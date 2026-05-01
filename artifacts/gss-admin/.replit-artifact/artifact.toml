@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Gametime Sports Suite Admin"
+version = "1.0.0"
+id = "artifacts/gss-admin"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23884
+
+[services.development]
+run = "pnpm --filter @workspace/gss-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/gss-admin", "run", "build" ]
+publicDir = "artifacts/gss-admin/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23884"
+BASE_PATH = "/"
