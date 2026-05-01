@@ -47,3 +47,14 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+.replit
+.replitignore
+.agents/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Attached assets (Replit uploads)
+attached_assets/
