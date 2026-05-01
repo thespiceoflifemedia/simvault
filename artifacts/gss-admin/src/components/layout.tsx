@@ -27,39 +27,39 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 const orgNav = [
-  { name: "Golf918", path: "/org", icon: Building },
-  { name: "Facilities", path: "/facilities", icon: Building },
-  { name: "Employees", path: "/org/employees", icon: Users },
-  { name: "Training Library", path: "/org/training", icon: BookOpen },
-  { name: "Audits", path: "/org/audits", icon: ClipboardCheck },
-  { name: "Support", path: "/org/support", icon: LifeBuoy },
-  { name: "Organization", path: "/org/settings", icon: Settings },
+  { name: "Golf918", path: "/admin/org", icon: Building },
+  { name: "Facilities", path: "/admin/facilities", icon: Building },
+  { name: "Employees", path: "/admin/org/employees", icon: Users },
+  { name: "Training Library", path: "/admin/org/training", icon: BookOpen },
+  { name: "Audits", path: "/admin/org/audits", icon: ClipboardCheck },
+  { name: "Support", path: "/admin/org/support", icon: LifeBuoy },
+  { name: "Organization", path: "/admin/org/settings", icon: Settings },
 ];
 
 const facilityNav = [
   { name: "Home", path: "/home", icon: Home },
-  { name: "Dashboard", path: "/", icon: LayoutDashboard },
-  { name: "Reports", path: "/reports", icon: FileBarChart },
-  { name: "Bookings", path: "/bookings", icon: CalendarDays },
-  { name: "Details", path: "/details", icon: Info },
-  { name: "Bays", path: "/bays", icon: LayoutGrid },
-  { name: "Memberships", path: "/memberships", icon: CreditCard },
-  { name: "POS", path: "/pos", icon: Monitor },
-  { name: "Passes", path: "/passes", icon: Ticket },
-  { name: "Discount Codes", path: "/discount-codes", icon: Tag },
-  { name: "Employees", path: "/employees", icon: Users },
-  { name: "Integrations", path: "/integrations", icon: Puzzle },
-  { name: "Legal", path: "/legal", icon: FileText },
-  { name: "Customers", path: "/customers", icon: Users },
-  { name: "Schedules", path: "/schedules", icon: Clock },
-  { name: "Notifications", path: "/notifications", icon: Bell },
+  { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+  { name: "Reports", path: "/admin/reports", icon: FileBarChart },
+  { name: "Bookings", path: "/admin/bookings", icon: CalendarDays },
+  { name: "Details", path: "/admin/details", icon: Info },
+  { name: "Bays", path: "/admin/bays", icon: LayoutGrid },
+  { name: "Memberships", path: "/admin/memberships", icon: CreditCard },
+  { name: "POS", path: "/admin/pos", icon: Monitor },
+  { name: "Passes", path: "/admin/passes", icon: Ticket },
+  { name: "Discount Codes", path: "/admin/discount-codes", icon: Tag },
+  { name: "Employees", path: "/admin/employees", icon: Users },
+  { name: "Integrations", path: "/admin/integrations", icon: Puzzle },
+  { name: "Legal", path: "/admin/legal", icon: FileText },
+  { name: "Customers", path: "/admin/customers", icon: Users },
+  { name: "Schedules", path: "/admin/schedules", icon: Clock },
+  { name: "Notifications", path: "/admin/notifications", icon: Bell },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const isOrgLevel = location.startsWith("/org") || location === "/facilities";
+  const isOrgLevel = location.startsWith("/admin/org") || location === "/admin/facilities";
   const currentNav = isOrgLevel ? orgNav : facilityNav;
 
   return (

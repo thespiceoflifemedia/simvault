@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
+import { MarketingLayout } from "@/components/marketing-layout";
 import NotFound from "@/pages/not-found";
 
 import Dashboard from "@/pages/dashboard";
@@ -22,28 +23,60 @@ import Customers from "@/pages/customers";
 import Schedules from "@/pages/schedules";
 import Notifications from "@/pages/notifications";
 
+import Home from "@/pages/marketing/home";
+import About from "@/pages/marketing/about";
+import Software from "@/pages/marketing/software";
+import Contact from "@/pages/marketing/contact";
+
 const queryClient = new QueryClient();
+
+function AdminRouter() {
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/admin" component={Dashboard} />
+        <Route path="/admin/facilities" component={Facilities} />
+        <Route path="/admin/reports" component={Reports} />
+        <Route path="/admin/bookings" component={Bookings} />
+        <Route path="/admin/details" component={Details} />
+        <Route path="/admin/bays" component={Bays} />
+        <Route path="/admin/memberships" component={Memberships} />
+        <Route path="/admin/pos" component={POS} />
+        <Route path="/admin/passes" component={Passes} />
+        <Route path="/admin/discount-codes" component={DiscountCodes} />
+        <Route path="/admin/employees" component={Employees} />
+        <Route path="/admin/integrations" component={Integrations} />
+        <Route path="/admin/legal" component={Legal} />
+        <Route path="/admin/customers" component={Customers} />
+        <Route path="/admin/schedules" component={Schedules} />
+        <Route path="/admin/notifications" component={Notifications} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  );
+}
+
+function MarketingRouter() {
+  return (
+    <MarketingLayout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/home" component={Home} />
+        <Route path="/about" component={About} />
+        <Route path="/software" component={Software} />
+        <Route path="/contact" component={Contact} />
+        <Route component={NotFound} />
+      </Switch>
+    </MarketingLayout>
+  );
+}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/facilities" component={Facilities} />
-      <Route path="/reports" component={Reports} />
-      <Route path="/bookings" component={Bookings} />
-      <Route path="/details" component={Details} />
-      <Route path="/bays" component={Bays} />
-      <Route path="/memberships" component={Memberships} />
-      <Route path="/pos" component={POS} />
-      <Route path="/passes" component={Passes} />
-      <Route path="/discount-codes" component={DiscountCodes} />
-      <Route path="/employees" component={Employees} />
-      <Route path="/integrations" component={Integrations} />
-      <Route path="/legal" component={Legal} />
-      <Route path="/customers" component={Customers} />
-      <Route path="/schedules" component={Schedules} />
-      <Route path="/notifications" component={Notifications} />
-      <Route component={NotFound} />
+      <Route path="/admin/*" component={AdminRouter} />
+      <Route path="/admin" component={AdminRouter} />
+      <Route path="/*" component={MarketingRouter} />
     </Switch>
   );
 }
@@ -53,9 +86,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Layout>
-            <Router />
-          </Layout>
+          <Router />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "RzVRazaundNoao8OYHX6J"
+uri = "file://artifacts/gss-admin/src/assets/laptop-mockup.png"
+type = "image"
+title = "Laptop mockup with dashboard"
