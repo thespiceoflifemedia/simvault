@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { CheckCircle2, ChevronRight } from "lucide-react";
+import { CheckCircle2, ChevronRight, Zap, Shield, BarChart3, Users } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -26,50 +26,57 @@ const staggerChildren = {
 
 export default function Home() {
   return (
-    <div className="bg-[#0a0a0a] min-h-screen text-white font-sans font-light">
-      {/* Section 1: Hero */}
+    <div className="bg-[#080b14] min-h-screen text-white font-sans font-light">
+      {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/68a4dd931f29543d7f3d08d0.webp" 
-            alt="Golf facility" 
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#3b82f6]/10 via-transparent to-[#6366f1]/5" />
+          <div className="absolute top-20 right-0 w-[600px] h-[600px] rounded-full bg-[#3b82f6]/5 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#6366f1]/5 blur-3xl" />
         </div>
-        
+
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
-              initial="hidden" 
-              animate="visible" 
+            <motion.div
+              initial="hidden"
+              animate="visible"
               variants={fadeIn}
               className="order-2 lg:order-1"
             >
-              <img 
-                src="/src/assets/laptop-mockup.png" 
-                alt="Golf 918 Dashboard" 
-                className="w-full max-w-2xl mx-auto drop-shadow-[0_0_40px_rgba(34,197,94,0.15)] rounded-lg"
-              />
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10">
+                <img
+                  src="https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/68a4dd931f29543d7f3d08d0.webp"
+                  alt="SimVault Dashboard"
+                  className="w-full object-cover opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#080b14]/60 to-transparent" />
+              </div>
             </motion.div>
-            
-            <motion.div 
-              initial="hidden" 
-              animate="visible" 
+
+            <motion.div
+              initial="hidden"
+              animate="visible"
               variants={fadeIn}
               className="order-1 lg:order-2 space-y-8"
             >
-              <h1 className="font-heading text-5xl md:text-[68px] leading-[1.1] font-bold text-white tracking-tight">
-                The Ultimate Sim Facility Solution
+              <div className="inline-flex items-center gap-2 bg-[#3b82f6]/10 border border-[#3b82f6]/30 rounded-full px-4 py-1.5 text-sm text-blue-400 font-medium">
+                <Zap className="w-3.5 h-3.5" />
+                All-in-one sim facility platform
+              </div>
+              <h1 className="font-heading text-5xl md:text-[64px] leading-[1.1] font-bold text-white tracking-tight">
+                Run Your Sim Facility Smarter
               </h1>
-              <p className="text-xl text-white/80 leading-relaxed font-light max-w-xl">
-                Attract. Retain. Engage. Fill bays with effortless booking and smart reminders, wow guests with personalized service, and keep revenue flowing through loyalty rewards and automated membership perks.
+              <p className="text-xl text-white/70 leading-relaxed font-light max-w-xl">
+                SimVault brings bookings, memberships, POS, and customer management into one seamless platform — so you can focus on delivering great experiences, not juggling software.
               </p>
-              <div>
+              <div className="flex items-center gap-4">
                 <Link href="/contact">
-                  <Button className="bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold rounded-full px-8 py-6 text-lg">
-                    Request a Demo
+                  <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-8 py-6 text-lg">
+                    Book a Demo
                   </Button>
+                </Link>
+                <Link href="/software" className="flex items-center text-white/60 hover:text-white transition-colors text-sm font-medium">
+                  Explore features <ChevronRight className="ml-1 w-4 h-4" />
                 </Link>
               </div>
             </motion.div>
@@ -77,10 +84,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 2: Stats bar */}
-      <section className="border-y border-white/10 bg-black/50 backdrop-blur-sm relative z-20">
+      {/* Stats bar */}
+      <section className="border-y border-white/10 bg-white/[0.02] backdrop-blur-sm relative z-20">
         <div className="container mx-auto px-4 md:px-8">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -88,25 +95,25 @@ export default function Home() {
             className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10"
           >
             {[
-              { value: "8-12%", label: "Efficiency", sub: "Increase" },
-              { value: "50+", label: "Happy", sub: "Customers" },
-              { value: "1K+", label: "Games", sub: "Streamlined" },
-              { value: "100K", label: "Revenue", sub: "Generated" }
+              { value: "15%+", label: "Revenue Lift", sub: "On Average" },
+              { value: "200+", label: "Facilities", sub: "Powered" },
+              { value: "5K+", label: "Bookings", sub: "Per Month" },
+              { value: "$2M+", label: "Revenue", sub: "Tracked" }
             ].map((stat, i) => (
               <motion.div key={i} variants={fadeIn} className="py-12 text-center">
-                <div className="text-4xl md:text-5xl font-heading font-bold text-[#22c55e] mb-2">{stat.value}</div>
+                <div className="text-4xl md:text-5xl font-heading font-bold text-[#3b82f6] mb-2">{stat.value}</div>
                 <div className="text-lg font-medium text-white">{stat.label}</div>
-                <div className="text-sm text-white/60 uppercase tracking-widest">{stat.sub}</div>
+                <div className="text-sm text-white/50 uppercase tracking-widest">{stat.sub}</div>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Section 3: Platform overview */}
+      {/* Platform overview */}
       <section className="py-32">
         <div className="container mx-auto px-4 md:px-8">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -114,17 +121,17 @@ export default function Home() {
             className="text-center max-w-4xl mx-auto mb-20"
           >
             <h2 className="font-heading text-4xl md:text-[48px] font-bold mb-6">
-              One platform to power your entire operation.
+              One platform. Every tool you need.
             </h2>
-            <p className="text-xl text-white/70 mb-8 leading-relaxed">
-              The complete solution for any golf facility. Tee sheet, POS, membership management, loyalty rewards, notifications, automation, reporting & more. Golf 918 helps you simplify, scale and deliver epic experiences.
+            <p className="text-xl text-white/60 mb-8 leading-relaxed">
+              Stop stitching together a dozen tools. SimVault is purpose-built for sim facilities — covering everything from bay scheduling and memberships to POS, loyalty, and real-time analytics.
             </p>
-            <Link href="/software" className="inline-flex items-center text-[#22c55e] hover:text-white transition-colors font-medium text-lg">
-              View Pricing <ChevronRight className="ml-2 h-5 w-5" />
+            <Link href="/software" className="inline-flex items-center text-[#3b82f6] hover:text-white transition-colors font-medium text-lg">
+              See all features <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -132,21 +139,24 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { title: "Tee Sheet", desc: "Automated scheduling, booking and payments" },
-              { title: "Integrated POS", desc: "Food and beverage orders and retail sales streamlined" },
-              { title: "Smart Solutions", desc: "Tee Sheet, Membership Management and POS optimized" }
+              { title: "Bay Scheduling", desc: "Intelligent booking and payment processing with real-time availability" },
+              { title: "Integrated POS", desc: "Food, beverage, and retail orders processed right from the bay" },
+              { title: "Smart Memberships", desc: "Automated renewals, perks, and loyalty rewards without lifting a finger" }
             ].map((feature, i) => (
-              <motion.div key={i} variants={fadeIn} className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
+              <motion.div key={i} variants={fadeIn} className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 hover:border-[#3b82f6]/30 hover:bg-white/[0.05] transition-all">
+                <div className="w-10 h-10 rounded-lg bg-[#3b82f6]/10 flex items-center justify-center mb-6">
+                  <div className="w-5 h-5 rounded-sm bg-[#3b82f6]" />
+                </div>
                 <h3 className="text-2xl font-heading font-bold mb-4">{feature.title}</h3>
-                <p className="text-white/70">{feature.desc}</p>
+                <p className="text-white/60">{feature.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Section 4: CTA banner */}
-      <section className="py-24 bg-gradient-to-br from-[#111] to-[#1a1a1a] border-y border-white/10">
+      {/* CTA banner */}
+      <section className="py-24 bg-gradient-to-br from-[#0f1629] to-[#080b14] border-y border-white/10">
         <div className="container mx-auto px-4 md:px-8 text-center">
           <motion.div
             initial="hidden"
@@ -154,22 +164,25 @@ export default function Home() {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <h2 className="font-heading text-3xl md:text-5xl font-bold mb-8">
-              The golf industry is evolving.<br/>Lead the way with Golf 918.
+            <h2 className="font-heading text-3xl md:text-5xl font-bold mb-4">
+              Sim facilities are growing fast.
             </h2>
+            <p className="text-xl text-white/60 mb-10 max-w-2xl mx-auto">
+              SimVault gives you the tools to outpace the competition and deliver experiences guests remember.
+            </p>
             <Link href="/contact">
-              <Button className="bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold rounded-full px-8 py-6 text-lg">
-                Request a Demo
+              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-10 py-6 text-lg">
+                Book a Demo
               </Button>
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* Section 5: Attract/Attain/Retain */}
+      {/* Connect / Manage / Grow */}
       <section className="py-32">
         <div className="container mx-auto px-4 md:px-8">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -177,67 +190,69 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-12"
           >
             {[
-              { title: "Attract", desc: "User-Friendly Online Booking" },
-              { title: "Attain", desc: "Maximize Control With Minimal Workload" },
-              { title: "Retain", desc: "Go Above With Built-In Loyalty Rewards" }
+              { title: "Connect", desc: "Reach new players with seamless online booking and smart notifications" },
+              { title: "Manage", desc: "Control every aspect of your facility from one unified dashboard" },
+              { title: "Grow", desc: "Drive revenue with loyalty programs, memberships, and automated upsells" }
             ].map((item, i) => (
               <motion.div key={i} variants={fadeIn} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#22c55e]/10 flex items-center justify-center mx-auto mb-6">
-                  <span className="text-[#22c55e] font-bold text-xl">{i + 1}</span>
+                <div className="w-16 h-16 rounded-2xl bg-[#3b82f6]/10 border border-[#3b82f6]/20 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-[#3b82f6] font-bold text-xl">{i + 1}</span>
                 </div>
-                <h3 className="text-2xl font-heading font-bold mb-4 text-[#22c55e] uppercase tracking-wider">{item.title}</h3>
-                <p className="text-xl font-medium">{item.desc}</p>
+                <h3 className="text-2xl font-heading font-bold mb-4 text-[#3b82f6] uppercase tracking-wider">{item.title}</h3>
+                <p className="text-lg text-white/70">{item.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Section 6: Feature icons */}
-      <section className="py-24 bg-black">
+      {/* Feature icons */}
+      <section className="py-24 bg-[#050710]">
         <div className="container mx-auto px-4 md:px-8">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerChildren}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {[
-              { 
-                icon: "https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/68788dd8e8df5499779129f3.svg",
-                title: "Optimize Bookings",
-                desc: "Tee Sheet software that is easy to use for customers and easy to manage for owners and staff."
+              {
+                icon: <BarChart3 className="w-8 h-8 text-[#3b82f6]" />,
+                title: "Smart Scheduling",
+                desc: "Bay management that's effortless for guests and operators alike, with real-time availability and instant confirmations."
               },
               {
-                icon: "https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/6894f237297c86c4b8956e18.svg",
-                title: "Membership Management",
-                desc: "Automated renewals and automated perks such as time credits and reduced rates - unlimited and customizable."
+                icon: <Users className="w-8 h-8 text-[#3b82f6]" />,
+                title: "Membership Engine",
+                desc: "Automate renewals and perks — time credits, reduced rates, early access — fully customizable to your business."
               },
               {
-                icon: "https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/68788dd8e8df543fa49129f4.svg",
-                title: "Custom POS",
-                desc: "QR code mobile ordering for food and beverages with a simplified and speedy check-out process."
+                icon: <Zap className="w-8 h-8 text-[#3b82f6]" />,
+                title: "Mobile-First POS",
+                desc: "QR code ordering for food and drinks at the bay — faster service, happier guests, higher average spend."
               },
               {
-                icon: "https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/68788dd84216d0c9be7dc17b.svg",
-                title: "Waitlist Technology",
-                desc: "Fill your tee sheet and reduce no-shows with tech that instantly notifies golfers of cancelations."
+                icon: <Shield className="w-8 h-8 text-[#3b82f6]" />,
+                title: "Automated Waitlists",
+                desc: "When a cancellation happens, SimVault instantly fills the slot — maximizing utilization without manual effort."
               }
             ].map((feature, i) => (
-              <motion.div key={i} variants={fadeIn} className="text-center p-8 bg-[#111] rounded-2xl border border-white/5">
-                <img src={feature.icon} alt={feature.title} className="w-16 h-16 mx-auto mb-6" />
+              <motion.div key={i} variants={fadeIn} className="text-center p-8 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-[#3b82f6]/20 transition-colors">
+                <div className="w-16 h-16 rounded-2xl bg-[#3b82f6]/10 flex items-center justify-center mx-auto mb-6">
+                  {feature.icon}
+                </div>
                 <h3 className="text-xl font-heading font-bold mb-4">{feature.title}</h3>
-                <p className="text-white/60 leading-relaxed">{feature.desc}</p>
+                <p className="text-white/50 leading-relaxed text-sm">{feature.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Section 7: Testimonials */}
+      {/* Testimonial */}
       <section className="py-32 overflow-hidden relative">
-        <div className="absolute inset-0 bg-[#22c55e]/5" />
+        <div className="absolute inset-0 bg-[#3b82f6]/5" />
         <div className="container mx-auto px-4 md:px-8 relative z-10 text-center">
           <motion.div
             initial="hidden"
@@ -246,29 +261,27 @@ export default function Home() {
             variants={fadeIn}
             className="max-w-4xl mx-auto"
           >
-            <h2 className="font-heading text-3xl font-bold mb-16 text-[#22c55e] uppercase tracking-widest">
-              What our customers say about our solution
+            <h2 className="font-heading text-sm font-bold mb-16 text-[#3b82f6] uppercase tracking-widest">
+              What our customers say
             </h2>
             <p className="text-3xl md:text-4xl font-heading font-medium leading-relaxed mb-12">
-              "918 Booking is the easiest and most efficient platform we've ever used for running our tee sheet. Easy to navigate, customize, and stay organized."
+              "SimVault completely changed how we run our facility. Booking, memberships, food orders — all in one place. Our staff can focus on the guests, not the software."
             </p>
             <div className="flex items-center justify-center">
-              <img 
-                src="https://assets.cdn.filesafe.space/44Clcz2HSgOWGKzYAzDh/media/687ec116c4e6b054ffdaa4c8.webp" 
-                alt="Cody Fisher" 
-                className="w-16 h-16 rounded-full mr-4 border-2 border-[#22c55e]"
-              />
+              <div className="w-14 h-14 rounded-full bg-[#3b82f6]/20 border-2 border-[#3b82f6] flex items-center justify-center mr-4 text-2xl font-bold text-[#3b82f6]">
+                M
+              </div>
               <div className="text-left">
-                <div className="font-bold text-lg">Cody Fisher</div>
-                <div className="text-white/60">Facility Owner</div>
+                <div className="font-bold text-lg">Marcus D.</div>
+                <div className="text-white/50">Sim Facility Owner, Chicago</div>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Section 8: Pricing */}
-      <section className="py-32 bg-[#0a0a0a]">
+      {/* Pricing */}
+      <section className="py-32 bg-[#080b14]">
         <div className="container mx-auto px-4 md:px-8">
           <motion.div
             initial="hidden"
@@ -277,138 +290,138 @@ export default function Home() {
             variants={fadeIn}
             className="text-center max-w-3xl mx-auto mb-20"
           >
-            <h2 className="font-heading text-4xl md:text-[48px] font-bold mb-6">Choose your plan</h2>
-            <p className="text-xl text-white/70">
-              Select a plan to gain access to our management software. With no startup fees and unlimited support.
+            <h2 className="font-heading text-4xl md:text-[48px] font-bold mb-6">Simple, transparent pricing</h2>
+            <p className="text-xl text-white/60">
+              No setup fees. No hidden costs. Unlimited support included on every plan.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
-            {/* Par Plan */}
+            {/* Starter */}
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
-              className="bg-[#111] rounded-3xl p-8 border border-white/10 flex flex-col"
+              className="bg-white/[0.03] rounded-3xl p-8 border border-white/10 flex flex-col"
             >
               <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-2">Par Plan</h3>
+                <h3 className="text-2xl font-bold mb-2">Starter</h3>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-4xl font-bold">$150</span>
-                  <span className="text-white/60 ml-2">/month</span>
+                  <span className="text-4xl font-bold">$149</span>
+                  <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#22c55e] font-medium mb-4">up to 5 Bays</p>
-                <p className="text-sm text-white/60 min-h-[60px]">
-                  Great for Sim Facilities With 1-4 Bays, Staff-less or Limited Staff, No Food & Drink or Retail
+                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-sm text-white/50 min-h-[60px]">
+                  Perfect for small sim facilities with 1–4 bays and minimal staff requirements.
                 </p>
               </div>
               <div className="space-y-4 mb-8 flex-1">
-                {["Tee Sheet", "Membership Management", "Integrated Payments", "Automated Waitlists", "Confirmation Reminders", "Analytics & CRM"].map((f, i) => (
+                {["Bay Scheduling", "Membership Management", "Integrated Payments", "Automated Waitlists", "Booking Reminders", "Analytics & CRM"].map((f, i) => (
                   <div key={i} className="flex items-start">
-                    <CheckCircle2 className="w-5 h-5 text-[#22c55e] mr-3 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#3b82f6] mr-3 shrink-0 mt-0.5" />
                     <span className="text-sm">{f}</span>
                   </div>
                 ))}
               </div>
               <div>
                 <Button className="w-full bg-white text-black hover:bg-gray-200 rounded-full py-6 mb-4 font-bold">
-                  Get Started with Par
+                  Start with Starter
                 </Button>
-                <p className="text-center text-xs text-white/60">30 Day-Free Trial Available</p>
+                <p className="text-center text-xs text-white/40">30-day free trial included</p>
               </div>
             </motion.div>
 
-            {/* Birdie Plan */}
+            {/* Growth */}
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
-              className="bg-gradient-to-b from-[#1a2e1f] to-[#111] rounded-3xl p-8 border-2 border-[#22c55e] flex flex-col relative"
+              className="bg-gradient-to-b from-[#0f1e3d] to-[#080b14] rounded-3xl p-8 border-2 border-[#3b82f6] flex flex-col relative"
             >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#22c55e] text-black font-bold text-sm px-4 py-1 rounded-full whitespace-nowrap">
-                🔥 Most Popular
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#3b82f6] text-white font-bold text-sm px-5 py-1.5 rounded-full whitespace-nowrap">
+                Most Popular
               </div>
               <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-2">Birdie Plan</h3>
+                <h3 className="text-2xl font-bold mb-2">Growth</h3>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-4xl font-bold">$250</span>
-                  <span className="text-white/60 ml-2">/month</span>
+                  <span className="text-4xl font-bold">$249</span>
+                  <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#22c55e] font-medium mb-4">up to 5 Bays</p>
-                <p className="text-sm text-white/60 min-h-[60px]">
-                  Great for Sim Facilities With Limited Food and Drink Offerings
+                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-sm text-white/50 min-h-[60px]">
+                  For growing facilities adding food & beverage and staff scheduling.
                 </p>
               </div>
               <div className="space-y-4 mb-8 flex-1">
-                {["Everything in Par", "Partial POS Features*", "Scheduler"].map((f, i) => (
+                {["Everything in Starter", "POS Essentials", "Staff Scheduler", "Loyalty Rewards"].map((f, i) => (
                   <div key={i} className="flex items-start">
-                    <CheckCircle2 className="w-5 h-5 text-[#22c55e] mr-3 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#3b82f6] mr-3 shrink-0 mt-0.5" />
                     <span className="text-sm font-medium">{f}</span>
                   </div>
                 ))}
               </div>
               <div>
-                <Button className="w-full bg-[#22c55e] text-black hover:bg-[#16a34a] rounded-full py-6 mb-4 font-bold">
-                  Get Started with Birdie
+                <Button className="w-full bg-[#3b82f6] text-white hover:bg-[#2563eb] rounded-full py-6 mb-4 font-bold">
+                  Start with Growth
                 </Button>
-                <p className="text-center text-xs text-white/60">30 Day-Free Trial Available</p>
+                <p className="text-center text-xs text-white/40">30-day free trial included</p>
               </div>
             </motion.div>
 
-            {/* Eagle Plan */}
+            {/* Pro */}
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
-              className="bg-[#111] rounded-3xl p-8 border border-white/10 flex flex-col"
+              className="bg-white/[0.03] rounded-3xl p-8 border border-white/10 flex flex-col"
             >
               <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-2">Eagle Plan</h3>
+                <h3 className="text-2xl font-bold mb-2">Pro</h3>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-4xl font-bold">$500</span>
-                  <span className="text-white/60 ml-2">/month</span>
+                  <span className="text-4xl font-bold">$449</span>
+                  <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#22c55e] font-medium mb-4">up to 5 Bays</p>
-                <p className="text-sm text-white/60 min-h-[60px]">
-                  Great for Large Sim Facilities With Full Restaurant
+                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-sm text-white/50 min-h-[60px]">
+                  For large facilities with full restaurant, advanced CRM, and multi-location needs.
                 </p>
               </div>
               <div className="space-y-4 mb-8 flex-1">
-                {["Everything in Birdie", "Full POS Features*", "Pre-Order Food & Beverages", "Advanced CRM and Loyalty", "Advanced Notifications and Messaging"].map((f, i) => (
+                {["Everything in Growth", "Full POS Suite", "Pre-Order at Bay", "Advanced CRM & Loyalty", "Priority Support", "Multi-Location Management"].map((f, i) => (
                   <div key={i} className="flex items-start">
-                    <CheckCircle2 className="w-5 h-5 text-[#22c55e] mr-3 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#3b82f6] mr-3 shrink-0 mt-0.5" />
                     <span className="text-sm">{f}</span>
                   </div>
                 ))}
               </div>
               <div>
                 <Button className="w-full bg-white text-black hover:bg-gray-200 rounded-full py-6 mb-4 font-bold">
-                  Get Started with Eagle
+                  Start with Pro
                 </Button>
-                <p className="text-center text-xs text-white/60">30 Day-Free Trial Available</p>
+                <p className="text-center text-xs text-white/40">30-day free trial included</p>
               </div>
             </motion.div>
           </div>
 
           <div className="max-w-4xl mx-auto text-center">
-            <p className="text-sm text-white/50 mb-8">
-              + $25USD per each additional bay — Basic training library and introductory call included — Custom onboarding and configuration starting at $250USD
+            <p className="text-sm text-white/40 mb-8">
+              +$25/month per additional bay — Onboarding call included — Custom configuration from $200
             </p>
-            <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
-              <h4 className="text-xl font-bold mb-4">Scalable Solutions</h4>
-              <p className="text-white/70">
-                More than one facility? Easily manage multiple locations from one system with our scalable solutions. Contact us for more information on how it works and pricing!
+            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8">
+              <h4 className="text-xl font-bold mb-4">Running multiple locations?</h4>
+              <p className="text-white/60">
+                Manage all your facilities from one account with centralized reporting and controls. Get in touch for multi-location pricing.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 9: FAQ */}
-      <section className="py-32 bg-black border-t border-white/10">
+      {/* FAQ */}
+      <section className="py-32 bg-[#050710] border-t border-white/10">
         <div className="container mx-auto px-4 md:px-8 max-w-4xl">
           <motion.div
             initial="hidden"
@@ -418,58 +431,58 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="font-heading text-4xl md:text-[48px] font-bold mb-6">Frequently Asked Questions</h2>
-            <p className="text-xl text-white/70">
-              Still have questions? Don't worry, we're happy to answer any questions.
+            <p className="text-xl text-white/60">
+              Have more questions? We're always happy to help.
             </p>
           </motion.div>
 
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1" className="border-white/10">
-              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#22c55e]">
-                How does the onboarding process work?
+              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#3b82f6]">
+                How does onboarding work?
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 leading-relaxed text-base pb-6">
-                Once you submit your information, we'll create your account with some templated content to get you started. You'll then be invited to book a 1-on-1 onboarding call, where we'll walk you through everything you need to know and help customize your setup.
+              <AccordionContent className="text-white/60 leading-relaxed text-base pb-6">
+                After you sign up, we'll set up your account with a tailored configuration and invite you to a 1-on-1 onboarding call. Our team walks you through everything and handles the setup so you can go live fast.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border-white/10">
-              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#22c55e]">
-                Can you transfer us from another provider?
+              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#3b82f6]">
+                Can you migrate us from another system?
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 leading-relaxed text-base pb-6">
-                Yes! If you're currently using Stripe, Square, or Payarc as your payment provider, we can seamlessly transfer your account and get you up and running quickly. We support csv formatted imports for customer lists and food and beverage menu items with templates available in-software.
+              <AccordionContent className="text-white/60 leading-relaxed text-base pb-6">
+                Yes. We support migration from Stripe, Square, and most common booking platforms. We also accept CSV imports for customer lists, menus, and membership data — and provide templates to make it easy.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3" className="border-white/10">
-              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#22c55e]">
-                What type of golf simulators can use Golf 918?
+              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#3b82f6]">
+                What simulator hardware does SimVault support?
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 leading-relaxed text-base pb-6">
-                Golf 918 works with any simulator. Our system manages bookings, food & beverage orders, and customer check-ins independently of your simulator hardware. That said, we offer a direct integration with TruGolf for an enhanced golfer experience.
+              <AccordionContent className="text-white/60 leading-relaxed text-base pb-6">
+                SimVault works with any simulator hardware. Our platform manages bookings, F&B, and customer check-ins independently of your hardware setup — so it doesn't matter which brand you use.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4" className="border-white/10">
-              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#22c55e]">
-                What does Golf 918 system integrate with?
+              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#3b82f6]">
+                What integrations does SimVault support?
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 leading-relaxed text-base pb-6">
-                We currently integrate with TruGolf for hardware & Stripe and Payarc for payments; Remote Lock for automated door access; and QuickBooks for financial reporting.
+              <AccordionContent className="text-white/60 leading-relaxed text-base pb-6">
+                We integrate with Stripe and Square for payments, RemoteLock for automated door access, and QuickBooks for financial reporting. More integrations are added regularly.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-5" className="border-white/10">
-              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#22c55e]">
-                Do you offer a free trial?
+              <AccordionTrigger className="text-lg font-medium py-6 hover:text-[#3b82f6]">
+                Is there a free trial?
               </AccordionTrigger>
-              <AccordionContent className="text-white/70 leading-relaxed text-base pb-6">
-                Yes! We offer a full 30-day free trial—no payment required. We'll ask for a card on file in case you decide to continue with a month-to-month subscription after the trial ends.
+              <AccordionContent className="text-white/60 leading-relaxed text-base pb-6">
+                Yes — every plan comes with a full 30-day free trial. No payment required upfront. We'll ask for a card on file when the trial ends in case you want to continue.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </div>
       </section>
 
-      {/* Section 10: Final CTA */}
-      <section className="py-32 bg-gradient-to-t from-[#111] to-black text-center border-t border-white/10">
+      {/* Final CTA */}
+      <section className="py-32 bg-gradient-to-t from-[#0f1629] to-[#050710] text-center border-t border-white/10">
         <div className="container mx-auto px-4 md:px-8 max-w-3xl">
           <motion.div
             initial="hidden"
@@ -478,14 +491,14 @@ export default function Home() {
             variants={fadeIn}
           >
             <h2 className="font-heading text-3xl md:text-5xl font-bold mb-8 leading-tight">
-              The ultimate all-in-one golf simulator management software.
+              The all-in-one platform for sim facilities that want to grow.
             </h2>
-            <p className="text-xl text-white/70 mb-12">
-              Golf 918 can help you simplify operations, reach more golfers & drive revenue.
+            <p className="text-xl text-white/60 mb-12">
+              SimVault helps you simplify operations, fill your bays, and deliver experiences that keep guests coming back.
             </p>
             <Link href="/contact">
-              <Button className="bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold rounded-full px-10 py-8 text-xl">
-                Watch Demo
+              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-10 py-8 text-xl">
+                Book a Demo
               </Button>
             </Link>
           </motion.div>

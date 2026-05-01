@@ -27,7 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 const orgNav = [
-  { name: "Golf918", path: "/admin/org", icon: Building },
+  { name: "SimVault", path: "/admin/org", icon: Building },
   { name: "Facilities", path: "/admin/facilities", icon: Building },
   { name: "Employees", path: "/admin/org/employees", icon: Users },
   { name: "Training Library", path: "/admin/org/training", icon: BookOpen },
