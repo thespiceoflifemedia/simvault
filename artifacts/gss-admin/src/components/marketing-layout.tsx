@@ -39,25 +39,23 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#080b14] text-white font-sans font-light selection:bg-blue-500/30 flex flex-col">
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#080b14]/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <Link href="/">
             <SimVaultLogo />
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
-            <Link href="/home" className={`hover:text-blue-400 transition-colors ${location === "/home" || location === "/" ? "text-blue-400" : "text-white/80"}`}>Home</Link>
-            <Link href="/about" className={`hover:text-blue-400 transition-colors ${location === "/about" ? "text-blue-400" : "text-white/80"}`}>About</Link>
-            <Link href="/software" className={`hover:text-blue-400 transition-colors ${location === "/software" ? "text-blue-400" : "text-white/80"}`}>Software</Link>
-            <Link href="/contact" className={`hover:text-blue-400 transition-colors ${location === "/contact" ? "text-blue-400" : "text-white/80"}`}>Contact</Link>
-            <a href="#" className="text-white/80 hover:text-blue-400 transition-colors">Help Centre</a>
+          <div className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <Link href="/about" className={`hover:text-blue-400 transition-colors ${location === "/about" ? "text-blue-400" : "text-white/70"}`}>About</Link>
+            <Link href="/software" className={`hover:text-blue-400 transition-colors ${location === "/software" ? "text-blue-400" : "text-white/70"}`}>Software</Link>
+            <Link href="/contact" className={`hover:text-blue-400 transition-colors ${location === "/contact" ? "text-blue-400" : "text-white/70"}`}>Contact</Link>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
-              Client Login
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link href="/login" className="text-white/60 hover:text-white text-sm font-medium transition-colors hidden md:block">
+              Login
             </Link>
             <Link href="/contact">
-              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-6">
+              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-6 py-2 text-sm">
                 Book a Demo
               </Button>
             </Link>
