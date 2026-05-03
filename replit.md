@@ -68,11 +68,12 @@
 | Legal | ✅ Live | Tabbed editor: Terms, Waiver, Privacy Policy |
 | Audits | ✅ Live | Audit log page with search/filter (client-side, no DB table yet) |
 | Support | ✅ Live | FAQ + contact form at `/admin/org/support` |
-| Reports | ✅ UI | Static report category browser |
-| POS | 🚧 Coming Soon | Preview with planned features |
-| Passes | 🚧 Coming Soon | Preview with planned features |
-| Discount Codes | 🚧 Coming Soon | Preview with planned features |
-| Schedules | 🚧 Coming Soon | Preview with planned features |
+| Reports | ✅ Live | 11 clickable reports — Booking History, Billing History, End of Day, Open Bills, Shift Report, Monthly Revenue, Quarterly Revenue, Category Performance, Peak Hours, Peak Days, Player Counts — all backed by real /api/bookings data |
+| POS | ✅ Live | Full menu management (Food/Drinks/Retail, toggle availability), open tabs per bay, close tab / checkout flow |
+| Passes | ✅ Live | Pass type CRUD (sessions/hours/unlimited), issued passes table, issue-pass dialog |
+| Discount Codes | ✅ Live | Full CRUD — create/edit/delete codes, percent/fixed discount, usage bar, copy-to-clipboard, active toggle |
+| Schedules | ✅ Live | Rate blocks CRUD with weekly grid overview + Business Hours editor (per-day open/close times) |
+| Integrations | ✅ Live | Connect flow (Stripe, Square) with credential dialog; disconnect confirm; Notify Me flow for coming-soon items |
 
 ## Marketing Pages
 

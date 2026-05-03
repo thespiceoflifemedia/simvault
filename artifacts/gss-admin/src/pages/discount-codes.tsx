@@ -1,14 +1,124 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tag, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Edit2, Trash2, Tag, Search, Copy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const examples = [
-  { code: "LAUNCH20", discount: "20% off", usage: "First booking only", expires: "Dec 31, 2025" },
-  { code: "MEMBER10", discount: "$10 off", usage: "Members only", expires: "No expiry" },
-  { code: "SUMMER25", discount: "25% off", usage: "Weekday bookings", expires: "Sep 1, 2025" },
+interface DiscountCode {
+  id: number;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  minOrder: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  active: boolean;
+  note: string;
+}
+
+const initCodes: DiscountCode[] = [
+  { id: 1, code: "LAUNCH20", type: "percent", value: 20, minOrder: null, maxUses: 100, usedCount: 43, expiresAt: "2025-12-31", active: true, note: "New customer promotion" },
+  { id: 2, code: "MEMBER10", type: "fixed", value: 10, minOrder: 50, maxUses: null, usedCount: 12, expiresAt: null, active: true, note: "Members only discount" },
+  { id: 3, code: "SUMMER25", type: "percent", value: 25, minOrder: null, maxUses: 50, usedCount: 50, expiresAt: "2025-09-01", active: false, note: "Summer promotion — ended" },
+  { id: 4, code: "EARLYBIRD", type: "fixed", value: 15, minOrder: 40, maxUses: 200, usedCount: 88, expiresAt: "2025-06-30", active: true, note: "Weekday morning bookings" },
 ];
 
+let nextId = 5;
+
+const emptyForm = { code: "", type: "percent" as DiscountCode["type"], value: "", minOrder: "", maxUses: "", expiresAt: "", active: true, note: "" };
+
+const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
 export default function DiscountCodes() {
+  const { toast } = useToast();
+  const [codes, setCodes] = useState<DiscountCode[]>(initCodes);
+  const [search, setSearch] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<DiscountCode | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const filtered = codes.filter((c) => {
+    const q = search.toLowerCase();
+    return c.code.toLowerCase().includes(q) || c.note.toLowerCase().includes(q);
+  });
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...emptyForm, code: generateCode() });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (c: DiscountCode) => {
+    setEditing(c);
+    setForm({
+      code: c.code,
+      type: c.type,
+      value: String(c.value),
+      minOrder: c.minOrder !== null ? String(c.minOrder) : "",
+      maxUses: c.maxUses !== null ? String(c.maxUses) : "",
+      expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : "",
+      active: c.active,
+      note: c.note,
+    });
+    setDialogOpen(true);
+  };
+
+  const generateCode = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  };
+
+  const handleSave = () => {
+    const val = parseFloat(form.value);
+    if (!form.code.trim() || isNaN(val)) return;
+    const data: DiscountCode = {
+      id: editing?.id ?? nextId++,
+      code: form.code.toUpperCase().trim(),
+      type: form.type,
+      value: val,
+      minOrder: form.minOrder ? parseFloat(form.minOrder) : null,
+      maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+      usedCount: editing?.usedCount ?? 0,
+      expiresAt: form.expiresAt || null,
+      active: form.active,
+      note: form.note,
+    };
+    if (editing) {
+      setCodes(codes.map((c) => c.id === editing.id ? data : c));
+    } else {
+      setCodes([...codes, data]);
+    }
+    setDialogOpen(false);
+    toast({ title: editing ? "Code updated" : "Discount code created" });
+  };
+
+  const handleDelete = (id: number) => {
+    setCodes(codes.filter((c) => c.id !== id));
+    setDeleteId(null);
+    toast({ title: "Code deleted" });
+  };
+
+  const toggleActive = (id: number) => {
+    setCodes(codes.map((c) => c.id === id ? { ...c, active: !c.active } : c));
+  };
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code).then(() => toast({ title: `Copied: ${code}` }));
+  };
+
+  const usagePercent = (c: DiscountCode) => {
+    if (!c.maxUses) return null;
+    return Math.round((c.usedCount / c.maxUses) * 100);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -16,58 +126,153 @@ export default function DiscountCodes() {
           <h1 className="text-2xl font-bold tracking-tight">Discount Codes</h1>
           <p className="text-muted-foreground text-sm mt-0.5">Promo codes and coupon management</p>
         </div>
+        <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1.5" />Create Code</Button>
       </div>
 
-      <div className="rounded-xl border bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 p-5 flex items-start gap-3">
-        <Zap className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-        <div>
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Coming Soon</p>
-          <p className="text-sm text-amber-700/80 dark:text-amber-400/80 mt-0.5">
-            Discount code management is in development. Below is an example of how codes will appear. Contact <a href="mailto:hello@simvault.io" className="underline">hello@simvault.io</a> to be notified when it launches.
-          </p>
+      <div className="flex items-center gap-2 max-w-sm">
+        <div className="relative w-full">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search codes…" className="pl-8 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
-      <div className="border rounded-md bg-card divide-y opacity-70">
-        <div className="grid grid-cols-4 px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
-          <div>Code</div>
-          <div>Discount</div>
-          <div>Restrictions</div>
-          <div>Expires</div>
+      {filtered.length === 0 ? (
+        <div className="border border-dashed rounded-xl p-12 text-center">
+          <Tag className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <h3 className="font-semibold mb-1">No discount codes</h3>
+          <p className="text-muted-foreground text-sm mb-4">Create codes to offer discounts to your customers.</p>
+          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1.5" />Create Code</Button>
         </div>
-        {examples.map((c, i) => (
-          <div key={i} className="grid grid-cols-4 px-4 py-3 text-sm items-center">
-            <div className="font-mono font-bold text-primary flex items-center gap-1.5">
-              <Tag className="h-3 w-3" />{c.code}
+      ) : (
+        <div className="border rounded-md bg-card">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead>Code</TableHead>
+                <TableHead>Discount</TableHead>
+                <TableHead>Usage</TableHead>
+                <TableHead>Expires</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Note</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((c) => {
+                const pct = usagePercent(c);
+                return (
+                  <TableRow key={c.id} className="hover:bg-muted/30">
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="h-3.5 w-3.5 text-primary" />
+                        <span className="font-mono font-bold text-primary">{c.code}</span>
+                        <button onClick={() => copyCode(c.code)} className="text-muted-foreground hover:text-foreground transition-colors">
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {c.type === "percent" ? `${c.value}% off` : `$${c.value.toFixed(2)} off`}
+                      {c.minOrder && <div className="text-[10px] text-muted-foreground">min ${c.minOrder} order</div>}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">{c.usedCount}{c.maxUses ? ` / ${c.maxUses}` : ""} uses</div>
+                      {pct !== null && (
+                        <div className="mt-1 h-1.5 w-20 rounded-full bg-muted overflow-hidden">
+                          <div className={`h-full rounded-full ${pct >= 90 ? "bg-red-500" : pct >= 60 ? "bg-amber-500" : "bg-primary"}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {c.expiresAt ? fmt(c.expiresAt) : "No expiry"}
+                    </TableCell>
+                    <TableCell>
+                      <Switch checked={c.active} onCheckedChange={() => toggleActive(c.id)} />
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-[140px] truncate">{c.note || "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(c.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Create / Edit dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editing ? "Edit Discount Code" : "Create Discount Code"}</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label>Code <span className="text-destructive">*</span></Label>
+                <button type="button" className="text-xs text-primary hover:underline" onClick={() => setForm({ ...form, code: generateCode() })}>Generate random</button>
+              </div>
+              <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="e.g. SUMMER25" className="font-mono font-bold" />
             </div>
-            <div className="font-medium">{c.discount}</div>
-            <div className="text-muted-foreground">{c.usage}</div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">{c.expires}</Badge>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Discount Type</Label>
+                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as DiscountCode["type"] })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percent">Percentage off</SelectItem>
+                    <SelectItem value="fixed">Fixed $ amount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Value <span className="text-destructive">*</span></Label>
+                <Input type="number" min="0" step={form.type === "percent" ? "1" : "0.01"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={form.type === "percent" ? "e.g. 20" : "e.g. 10.00"} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Min. Order ($)</Label>
+                <Input type="number" min="0" step="0.01" value={form.minOrder} onChange={(e) => setForm({ ...form, minOrder: e.target.value })} placeholder="No minimum" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Max Uses</Label>
+                <Input type="number" min="1" value={form.maxUses} onChange={(e) => setForm({ ...form, maxUses: e.target.value })} placeholder="Unlimited" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Expiry Date</Label>
+              <Input type="date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Internal Note</Label>
+              <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Optional note for your team" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch id="code-active" checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+              <Label htmlFor="code-active">Active (can be redeemed)</Label>
             </div>
           </div>
-        ))}
-      </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={!form.code.trim() || !form.value}>{editing ? "Save Changes" : "Create Code"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Planned discount types</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
-          {[
-            "Percentage off any booking",
-            "Fixed dollar amount off",
-            "Free add-ons (food & beverage)",
-            "Membership discount extensions",
-            "Time-restricted codes (happy hour)",
-            "Single-use personal codes",
-          ].map((d, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="text-primary">✓</span> {d}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      {/* Delete dialog */}
+      <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Delete discount code?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">This code will be permanently removed and can no longer be redeemed.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => deleteId !== null && handleDelete(deleteId)}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -208,10 +208,10 @@ export default function Bookings() {
   const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
   const totalHeight = (END_HOUR - START_HOUR) * SLOT_HEIGHT;
 
-  const now = new Date();
+  const currentTime = new Date();
   const todayCurrentOffset =
-    selectedDate.toDateString() === now.toDateString()
-      ? (now.getHours() + now.getMinutes() / 60 - START_HOUR) * SLOT_HEIGHT
+    selectedDate.toDateString() === currentTime.toDateString()
+      ? (currentTime.getHours() + currentTime.getMinutes() / 60 - START_HOUR) * SLOT_HEIGHT
       : null;
 
   return (
