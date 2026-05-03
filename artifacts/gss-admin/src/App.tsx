@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { AuthProvider } from "@/lib/auth";
 import { ProtectedRoute } from "@/components/protected-route";
+import { Analytics } from "@vercel/analytics/react";
 import NotFound from "@/pages/not-found";
 
 import Dashboard from "@/pages/dashboard";
@@ -104,6 +105,7 @@ function App() {
             <Router />
           </WouterRouter>
           <Toaster />
+          <Analytics />
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
