@@ -49,6 +49,10 @@ async function migrate() {
       )
     `);
 
+    // Add missing customer columns (idempotent)
+    await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS time_credits INTEGER NOT NULL DEFAULT 0`);
+    await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS bays (
         id SERIAL PRIMARY KEY,
@@ -61,6 +65,11 @@ async function migrate() {
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `);
+
+    // Add missing bay columns (idempotent)
+    await client.query(`ALTER TABLE bays ADD COLUMN IF NOT EXISTS bay_type TEXT NOT NULL DEFAULT 'regular'`);
+    await client.query(`ALTER TABLE bays ADD COLUMN IF NOT EXISTS min_players INTEGER NOT NULL DEFAULT 1`);
+    await client.query(`ALTER TABLE bays ADD COLUMN IF NOT EXISTS max_players INTEGER NOT NULL DEFAULT 6`);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS bookings (
@@ -97,6 +106,22 @@ async function migrate() {
       )
     `);
 
+    // Membership plan templates (Golf918 "Memberships" admin page)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS membership_plans (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        price NUMERIC(10, 2),
+        hours_per_month NUMERIC(5, 1),
+        active BOOLEAN NOT NULL DEFAULT true,
+        visibility TEXT NOT NULL DEFAULT 'public',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS passes (
         id SERIAL PRIMARY KEY,
@@ -108,6 +133,21 @@ async function migrate() {
         price NUMERIC(10, 2) NOT NULL,
         remaining INTEGER NOT NULL,
         expires_at TIMESTAMP,
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Pass product templates (Golf918 "Passes" admin page)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pass_plans (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        price NUMERIC(10, 2) NOT NULL,
+        credits_value INTEGER NOT NULL DEFAULT 0,
         status TEXT NOT NULL DEFAULT 'active',
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -130,6 +170,12 @@ async function migrate() {
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `);
+
+    // Add missing discount_codes columns (idempotent)
+    await client.query(`ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS name TEXT`);
+    await client.query(`ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS applies_to TEXT NOT NULL DEFAULT 'all'`);
+    await client.query(`ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS used_count INTEGER NOT NULL DEFAULT 0`);
+    await client.query(`ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS min_order NUMERIC(10, 2)`);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS schedules (
@@ -234,6 +280,24 @@ async function migrate() {
       )
     `);
 
+    // Facility settings (Golf918 "Details" page — booking window, payments, cancellation, taxes)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS facility_settings (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE UNIQUE,
+        timezone TEXT NOT NULL DEFAULT 'America/New_York',
+        advance_booking_days INTEGER NOT NULL DEFAULT 30,
+        minimum_duration_minutes INTEGER NOT NULL DEFAULT 30,
+        online_payments_required BOOLEAN NOT NULL DEFAULT false,
+        currency TEXT NOT NULL DEFAULT 'USD',
+        cancellation_fee_days INTEGER NOT NULL DEFAULT 1,
+        cancellation_fee_percent NUMERIC(5, 2) NOT NULL DEFAULT 100,
+        tax_percent NUMERIC(5, 2) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     // Session table for connect-pg-simple
     await client.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
@@ -247,7 +311,7 @@ async function migrate() {
     `);
 
     await client.query("COMMIT");
-    console.log("Migration complete: all tables created");
+    console.log("Migration complete: all tables created/updated");
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Migration failed:", err);

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { tenantsTable, usersTable } from "@workspace/db";
+import { tenantsTable, usersTable, facilitySettingsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth";
 import { z } from "zod";
@@ -13,6 +13,17 @@ const updateTenantSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+});
+
+const facilitySettingsSchema = z.object({
+  timezone: z.string().optional(),
+  advanceBookingDays: z.coerce.number().int().min(1).max(365).optional(),
+  minimumDurationMinutes: z.coerce.number().int().min(15).max(480).optional(),
+  onlinePaymentsRequired: z.boolean().optional(),
+  currency: z.string().length(3).optional(),
+  cancellationFeeDays: z.coerce.number().int().min(0).optional(),
+  cancellationFeePercent: z.coerce.number().min(0).max(100).optional(),
+  taxPercent: z.coerce.number().min(0).max(100).optional(),
 });
 
 const inviteEmployeeSchema = z.object({
@@ -51,13 +62,59 @@ router.put("/tenant", requireAuth, async (req, res) => {
   res.json(updated);
 });
 
+router.get("/facility-settings", requireAuth, async (req, res) => {
+  const tenantId = req.session.tenantId!;
+  let [settings] = await db
+    .select()
+    .from(facilitySettingsTable)
+    .where(eq(facilitySettingsTable.tenantId, tenantId))
+    .limit(1);
+  if (!settings) {
+    [settings] = await db
+      .insert(facilitySettingsTable)
+      .values({ tenantId })
+      .returning();
+  }
+  res.json(settings);
+});
+
+router.put("/facility-settings", requireAuth, async (req, res) => {
+  const tenantId = req.session.tenantId!;
+  const parsed = facilitySettingsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+    return;
+  }
+  const existing = await db
+    .select({ id: facilitySettingsTable.id })
+    .from(facilitySettingsTable)
+    .where(eq(facilitySettingsTable.tenantId, tenantId))
+    .limit(1);
+  let settings;
+  if (existing.length === 0) {
+    [settings] = await db
+      .insert(facilitySettingsTable)
+      .values({ tenantId, ...parsed.data })
+      .returning();
+  } else {
+    [settings] = await db
+      .update(facilitySettingsTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(facilitySettingsTable.tenantId, tenantId))
+      .returning();
+  }
+  res.json(settings);
+});
+
 router.get("/employees", requireAuth, async (req, res) => {
   const employees = await db
     .select({
       id: usersTable.id,
       name: usersTable.name,
       email: usersTable.email,
+      phone: usersTable.phone,
       role: usersTable.role,
+      position: usersTable.position,
       createdAt: usersTable.createdAt,
     })
     .from(usersTable)
@@ -73,7 +130,7 @@ router.post("/employees", requireAuth, async (req, res) => {
     return;
   }
 
-  const { name, email, password, role } = parsed.data;
+  const { name, email, password, role, phone, position } = parsed.data;
 
   const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
   if (existing.length > 0) {
@@ -88,11 +145,15 @@ router.post("/employees", requireAuth, async (req, res) => {
     passwordHash,
     name,
     role,
+    phone: phone ?? null,
+    position: position ?? null,
   }).returning({
     id: usersTable.id,
     name: usersTable.name,
     email: usersTable.email,
+    phone: usersTable.phone,
     role: usersTable.role,
+    position: usersTable.position,
     createdAt: usersTable.createdAt,
   });
 
