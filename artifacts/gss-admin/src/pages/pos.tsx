@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Edit2, Trash2, ShoppingCart, Receipt, Monitor } from "lucide-react";
+import { Plus, Edit2, Trash2, ShoppingCart, Receipt, Monitor, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MenuItem {
@@ -33,44 +33,13 @@ interface OpenTab {
 }
 
 const CATEGORIES = ["Food", "Drinks", "Retail", "Other"];
-
-const initMenu: MenuItem[] = [
-  { id: 1, name: "Beer (Draft)", category: "Drinks", price: 7, available: true, description: "Local draft on tap" },
-  { id: 2, name: "House Wine", category: "Drinks", price: 10, available: true, description: "Red or white" },
-  { id: 3, name: "Sparkling Water", category: "Drinks", price: 4, available: true, description: "Bottled" },
-  { id: 4, name: "Loaded Fries", category: "Food", price: 12, available: true, description: "Cheese, bacon, sour cream" },
-  { id: 5, name: "Chicken Sliders (3)", category: "Food", price: 14, available: true, description: "Served with slaw" },
-  { id: 6, name: "Nachos", category: "Food", price: 13, available: true, description: "With guac and salsa" },
-  { id: 7, name: "Golf Glove", category: "Retail", price: 22, available: true, description: "Cadet & standard sizes" },
-  { id: 8, name: "Sleeve of Balls", category: "Retail", price: 9, available: false, description: "3-pack premium range balls" },
-];
-
-const initTabs: OpenTab[] = [
-  {
-    id: 1, bay: "Bay 1", customer: "John Smith",
-    items: [
-      { menuItem: initMenu[0], qty: 2 },
-      { menuItem: initMenu[3], qty: 1 },
-    ],
-    openedAt: new Date(Date.now() - 45 * 60000).toISOString(),
-  },
-  {
-    id: 2, bay: "Bay 3", customer: "Sarah Johnson",
-    items: [
-      { menuItem: initMenu[1], qty: 1 },
-    ],
-    openedAt: new Date(Date.now() - 15 * 60000).toISOString(),
-  },
-];
-
-let nextId = 9;
-
 const emptyForm = { name: "", category: "Food", price: "", available: true, description: "" };
 
 export default function POS() {
   const { toast } = useToast();
-  const [menu, setMenu] = useState<MenuItem[]>(initMenu);
-  const [tabs, setTabs] = useState<OpenTab[]>(initTabs);
+  const [menu, setMenu] = useState<MenuItem[]>([]);
+  const [tabs, setTabs] = useState<OpenTab[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<MenuItem | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -79,6 +48,25 @@ export default function POS() {
   const [newTabBay, setNewTabBay] = useState("Bay 1");
   const [newTabCustomer, setNewTabCustomer] = useState("");
   const [checkoutId, setCheckoutId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [bays, setBays] = useState<{ id: number; name: string }[]>([]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [menuRes, baysRes] = await Promise.all([
+        fetch("/api/pos-orders", { credentials: "include" }),
+        fetch("/api/bays", { credentials: "include" }),
+      ]);
+      if (menuRes.ok) setMenu(await menuRes.json());
+      if (baysRes.ok) setBays(await baysRes.json());
+    } catch (e) {
+      toast({ title: "Failed to load POS data", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
   const openEdit = (item: MenuItem) => {
@@ -87,32 +75,49 @@ export default function POS() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const priceNum = parseFloat(form.price);
     if (!form.name.trim() || isNaN(priceNum)) return;
-    if (editing) {
-      setMenu(menu.map((m) => m.id === editing.id ? { ...m, ...form, price: priceNum } : m));
-    } else {
-      setMenu([...menu, { id: nextId++, name: form.name, category: form.category, price: priceNum, available: form.available, description: form.description }]);
+    setSaving(true);
+    const body = { name: form.name, category: form.category, price: priceNum, available: form.available, description: form.description };
+    try {
+      if (editing) {
+        await fetch(`/api/pos-orders/${editing.id}`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      } else {
+        await fetch("/api/pos-orders", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      }
+      setDialogOpen(false);
+      loadData();
+      toast({ title: editing ? "Item updated" : "Item added" });
+    } catch (e) {
+      toast({ title: "Error", variant: "destructive" });
     }
-    setDialogOpen(false);
-    toast({ title: editing ? "Item updated" : "Item added" });
+    setSaving(false);
   };
 
-  const handleDelete = (id: number) => {
-    setMenu(menu.filter((m) => m.id !== id));
+  const handleDelete = async (id: number) => {
+    await fetch(`/api/pos-orders/${id}`, { method: "DELETE", credentials: "include" });
     setDeleteId(null);
+    loadData();
     toast({ title: "Item removed" });
   };
 
-  const toggleAvailable = (id: number) => {
-    setMenu(menu.map((m) => m.id === id ? { ...m, available: !m.available } : m));
+  const toggleAvailable = async (id: number) => {
+    const item = menu.find((m) => m.id === id);
+    if (!item) return;
+    await fetch(`/api/pos-orders/${id}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...item, available: !item.available }),
+    });
+    loadData();
   };
 
-  const openNewTab = () => { setNewTabBay("Bay 1"); setNewTabCustomer(""); setNewTabOpen(true); };
+  const openNewTab = () => { setNewTabBay(bays[0]?.name || "Bay 1"); setNewTabCustomer(""); setNewTabOpen(true); };
   const createTab = () => {
     if (!newTabCustomer.trim()) return;
-    setTabs([...tabs, { id: nextId++, bay: newTabBay, customer: newTabCustomer, items: [], openedAt: new Date().toISOString() }]);
+    setTabs([...tabs, { id: Date.now(), bay: newTabBay, customer: newTabCustomer, items: [], openedAt: new Date().toISOString() }]);
     setNewTabOpen(false);
     toast({ title: `Tab opened for ${newTabCustomer} at ${newTabBay}` });
   };
@@ -136,6 +141,8 @@ export default function POS() {
   const categories = CATEGORIES.filter((c) => menu.some((m) => m.category === c));
   const checkoutTab = tabs.find((t) => t.id === checkoutId);
 
+  if (loading) return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -151,7 +158,6 @@ export default function POS() {
           <TabsTrigger value="tabs"><ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Open Tabs ({tabs.length})</TabsTrigger>
         </TabsList>
 
-        {/* Menu Management */}
         <TabsContent value="menu" className="mt-4 space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{menu.filter((m) => m.available).length} of {menu.length} items available</p>
@@ -184,7 +190,6 @@ export default function POS() {
           ))}
         </TabsContent>
 
-        {/* Open Tabs */}
         <TabsContent value="tabs" className="mt-4 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{tabs.length} open {tabs.length === 1 ? "tab" : "tabs"}</p>
@@ -231,7 +236,6 @@ export default function POS() {
         </TabsContent>
       </Tabs>
 
-      {/* Add/Edit menu item */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? "Edit Item" : "Add Menu Item"}</DialogTitle></DialogHeader>
@@ -266,12 +270,11 @@ export default function POS() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!form.name.trim() || !form.price}>{editing ? "Save Changes" : "Add Item"}</Button>
+            <Button onClick={handleSave} disabled={saving || !form.name.trim() || !form.price}>{editing ? "Save Changes" : "Add Item"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete dialog */}
       <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Remove menu item?</DialogTitle></DialogHeader>
@@ -283,7 +286,6 @@ export default function POS() {
         </DialogContent>
       </Dialog>
 
-      {/* Open new tab */}
       <Dialog open={newTabOpen} onOpenChange={setNewTabOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Open Tab</DialogTitle></DialogHeader>
@@ -293,7 +295,7 @@ export default function POS() {
               <Select value={newTabBay} onValueChange={setNewTabBay}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {["Bay 1","Bay 2","Bay 3","Bay 4","Bay 5","Bay 6"].map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                  {bays.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -309,7 +311,6 @@ export default function POS() {
         </DialogContent>
       </Dialog>
 
-      {/* Checkout dialog */}
       <Dialog open={checkoutId !== null} onOpenChange={() => setCheckoutId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Close Tab — {checkoutTab?.customer}</DialogTitle></DialogHeader>

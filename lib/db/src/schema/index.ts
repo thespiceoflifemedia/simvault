@@ -4,3 +4,8 @@ export * from "./bays";
 export * from "./customers";
 export * from "./bookings";
 export * from "./memberships";
+export * from "./pos-orders";
+export * from "./passes";
+export * from "./discount-codes";
+export * from "./schedules";
+export * from "./loyalty-points";

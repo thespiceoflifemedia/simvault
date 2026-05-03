@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Tag, Search, Copy } from "lucide-react";
+import { Plus, Edit2, Trash2, Tag, Search, Copy, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DiscountCode {
@@ -20,34 +20,37 @@ interface DiscountCode {
   usedCount: number;
   expiresAt: string | null;
   active: boolean;
-  note: string;
 }
 
-const initCodes: DiscountCode[] = [
-  { id: 1, code: "LAUNCH20", type: "percent", value: 20, minOrder: null, maxUses: 100, usedCount: 43, expiresAt: "2025-12-31", active: true, note: "New customer promotion" },
-  { id: 2, code: "MEMBER10", type: "fixed", value: 10, minOrder: 50, maxUses: null, usedCount: 12, expiresAt: null, active: true, note: "Members only discount" },
-  { id: 3, code: "SUMMER25", type: "percent", value: 25, minOrder: null, maxUses: 50, usedCount: 50, expiresAt: "2025-09-01", active: false, note: "Summer promotion — ended" },
-  { id: 4, code: "EARLYBIRD", type: "fixed", value: 15, minOrder: 40, maxUses: 200, usedCount: 88, expiresAt: "2025-06-30", active: true, note: "Weekday morning bookings" },
-];
-
-let nextId = 5;
-
-const emptyForm = { code: "", type: "percent" as DiscountCode["type"], value: "", minOrder: "", maxUses: "", expiresAt: "", active: true, note: "" };
-
-const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const emptyForm = { code: "", type: "percent" as DiscountCode["type"], value: "", minOrder: "", maxUses: "", expiresAt: "", active: true };
 
 export default function DiscountCodes() {
   const { toast } = useToast();
-  const [codes, setCodes] = useState<DiscountCode[]>(initCodes);
+  const [codes, setCodes] = useState<DiscountCode[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<DiscountCode | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const loadCodes = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/discount-codes", { credentials: "include" });
+      if (res.ok) setCodes(await res.json());
+    } catch (e) {
+      toast({ title: "Failed to load codes", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { loadCodes(); }, []);
 
   const filtered = codes.filter((c) => {
     const q = search.toLowerCase();
-    return c.code.toLowerCase().includes(q) || c.note.toLowerCase().includes(q);
+    return c.code.toLowerCase().includes(q);
   });
 
   const openCreate = () => {
@@ -66,7 +69,6 @@ export default function DiscountCodes() {
       maxUses: c.maxUses !== null ? String(c.maxUses) : "",
       expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : "",
       active: c.active,
-      note: c.note,
     });
     setDialogOpen(true);
   };
@@ -76,38 +78,51 @@ export default function DiscountCodes() {
     return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const val = parseFloat(form.value);
     if (!form.code.trim() || isNaN(val)) return;
-    const data: DiscountCode = {
-      id: editing?.id ?? nextId++,
+    setSaving(true);
+    const body = {
       code: form.code.toUpperCase().trim(),
       type: form.type,
       value: val,
       minOrder: form.minOrder ? parseFloat(form.minOrder) : null,
       maxUses: form.maxUses ? parseInt(form.maxUses) : null,
-      usedCount: editing?.usedCount ?? 0,
       expiresAt: form.expiresAt || null,
       active: form.active,
-      note: form.note,
     };
-    if (editing) {
-      setCodes(codes.map((c) => c.id === editing.id ? data : c));
-    } else {
-      setCodes([...codes, data]);
+    try {
+      if (editing) {
+        await fetch(`/api/discount-codes/${editing.id}`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      } else {
+        await fetch("/api/discount-codes", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      }
+      setDialogOpen(false);
+      loadCodes();
+      toast({ title: editing ? "Code updated" : "Code created" });
+    } catch (e) {
+      toast({ title: "Error", variant: "destructive" });
     }
-    setDialogOpen(false);
-    toast({ title: editing ? "Code updated" : "Discount code created" });
+    setSaving(false);
   };
 
-  const handleDelete = (id: number) => {
-    setCodes(codes.filter((c) => c.id !== id));
+  const handleDelete = async (id: number) => {
+    await fetch(`/api/discount-codes/${id}`, { method: "DELETE", credentials: "include" });
     setDeleteId(null);
+    loadCodes();
     toast({ title: "Code deleted" });
   };
 
-  const toggleActive = (id: number) => {
-    setCodes(codes.map((c) => c.id === id ? { ...c, active: !c.active } : c));
+  const toggleActive = async (id: number) => {
+    const code = codes.find((c) => c.id === id);
+    if (!code) return;
+    await fetch(`/api/discount-codes/${id}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...code, active: !code.active }),
+    });
+    loadCodes();
   };
 
   const copyCode = (code: string) => {
@@ -118,6 +133,10 @@ export default function DiscountCodes() {
     if (!c.maxUses) return null;
     return Math.round((c.usedCount / c.maxUses) * 100);
   };
+
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  if (loading) return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-6">
@@ -153,7 +172,6 @@ export default function DiscountCodes() {
                 <TableHead>Usage</TableHead>
                 <TableHead>Expires</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Note</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -189,7 +207,6 @@ export default function DiscountCodes() {
                     <TableCell>
                       <Switch checked={c.active} onCheckedChange={() => toggleActive(c.id)} />
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-[140px] truncate">{c.note || "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Edit2 className="h-3.5 w-3.5" /></Button>
@@ -204,10 +221,9 @@ export default function DiscountCodes() {
         </div>
       )}
 
-      {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit Discount Code" : "Create Discount Code"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? "Edit Code" : "Create Code"}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -218,7 +234,7 @@ export default function DiscountCodes() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Discount Type</Label>
+                <Label>Type</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as DiscountCode["type"] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -229,7 +245,7 @@ export default function DiscountCodes() {
               </div>
               <div className="space-y-1.5">
                 <Label>Value <span className="text-destructive">*</span></Label>
-                <Input type="number" min="0" step={form.type === "percent" ? "1" : "0.01"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={form.type === "percent" ? "e.g. 20" : "e.g. 10.00"} />
+                <Input type="number" min="0" step={form.type === "percent" ? "1" : "0.01"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="e.g. 20" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -246,27 +262,22 @@ export default function DiscountCodes() {
               <Label>Expiry Date</Label>
               <Input type="date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Internal Note</Label>
-              <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Optional note for your team" />
-            </div>
             <div className="flex items-center gap-3">
               <Switch id="code-active" checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
-              <Label htmlFor="code-active">Active (can be redeemed)</Label>
+              <Label htmlFor="code-active">Active</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!form.code.trim() || !form.value}>{editing ? "Save Changes" : "Create Code"}</Button>
+            <Button onClick={handleSave} disabled={saving || !form.code.trim() || !form.value}>{editing ? "Save Changes" : "Create Code"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete dialog */}
       <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Delete discount code?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">This code will be permanently removed and can no longer be redeemed.</p>
+          <DialogHeader><DialogTitle>Delete code?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">This code will be permanently removed.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => deleteId !== null && handleDelete(deleteId)}>Delete</Button>
