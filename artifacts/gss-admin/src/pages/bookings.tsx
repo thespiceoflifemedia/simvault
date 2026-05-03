@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, Plus, CalendarDays, Edit2, Trash2, ChevronLeft, ChevronRight, Filter, BarChart3, List, CalendarRange } from "lucide-react";
+import { Search, Plus, CalendarDays, Edit2, Trash2, ChevronLeft, ChevronRight, Filter, List } from "lucide-react";
 
 interface Booking {
   id: number;
@@ -33,6 +33,18 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-50 text-red-500 border-red-200",
   completed: "bg-blue-50 text-blue-700 border-blue-200",
 };
+
+const calendarBlockColors: Record<string, string> = {
+  confirmed: "bg-green-500 text-white",
+  pending: "bg-yellow-400 text-yellow-900",
+  cancelled: "bg-red-400 text-white opacity-60",
+  completed: "bg-blue-500 text-white",
+};
+
+// Hours displayed in the calendar: 6 AM – 10 PM
+const START_HOUR = 6;
+const END_HOUR = 22;
+const SLOT_HEIGHT = 48; // px per hour
 
 const toLocal = (iso: string) => {
   const d = new Date(iso);
@@ -67,9 +79,12 @@ const emptyForm = {
   totalPrice: "",
 };
 
-const timeSlots = [
-  "1:00 AM","1:30 AM","2:00 AM","2:30 AM","3:00 AM","3:30 AM","4:00 AM","4:30 AM","5:00 AM","5:30 AM","6:00 AM","6:30 AM","7:00 AM","7:30 AM"
-];
+const hourLabel = (h: number) => {
+  if (h === 0) return "12 AM";
+  if (h < 12) return `${h} AM`;
+  if (h === 12) return "12 PM";
+  return `${h - 12} PM`;
+};
 
 export default function Bookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -108,8 +123,7 @@ export default function Bookings() {
   const filtered = bookings.filter((b) => {
     const q = search.toLowerCase();
     const bayMatch = selectedBay === "all" || String(b.bayId ?? "") === selectedBay;
-    return (
-      bayMatch &&
+    return bayMatch && (
       b.customerName.toLowerCase().includes(q) ||
       (b.customerEmail ?? "").toLowerCase().includes(q) ||
       getBayName(b.bayId).toLowerCase().includes(q)
@@ -120,6 +134,11 @@ export default function Bookings() {
     const dateKey = selectedDate.toDateString();
     return filtered.filter((b) => new Date(b.startTime).toDateString() === dateKey);
   }, [filtered, selectedDate]);
+
+  // Bays to show in calendar (max 6)
+  const calendarBays = bays.length > 0 ? bays.slice(0, 6) : [
+    { id: -1, name: "Bay 1" }, { id: -2, name: "Bay 2" }, { id: -3, name: "Bay 3" },
+  ];
 
   const openCreate = () => {
     setEditingBooking(null);
@@ -173,6 +192,28 @@ export default function Bookings() {
     loadData();
   };
 
+  // Position a booking as a CSS block within the calendar grid column
+  const getBookingStyle = (booking: Booking) => {
+    const start = new Date(booking.startTime);
+    const end = new Date(booking.endTime);
+    const startHour = start.getHours() + start.getMinutes() / 60;
+    const endHour = end.getHours() + end.getMinutes() / 60;
+    const clampedStart = Math.max(startHour, START_HOUR);
+    const clampedEnd = Math.min(endHour, END_HOUR);
+    const top = (clampedStart - START_HOUR) * SLOT_HEIGHT;
+    const height = Math.max((clampedEnd - clampedStart) * SLOT_HEIGHT - 2, 20);
+    return { top, height };
+  };
+
+  const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
+  const totalHeight = (END_HOUR - START_HOUR) * SLOT_HEIGHT;
+
+  const now = new Date();
+  const todayCurrentOffset =
+    selectedDate.toDateString() === now.toDateString()
+      ? (now.getHours() + now.getMinutes() / 60 - START_HOUR) * SLOT_HEIGHT
+      : null;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -191,7 +232,7 @@ export default function Bookings() {
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by name, email or phone"
+              placeholder="Search by name, email or bay"
               className="pl-9 bg-background"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -199,78 +240,149 @@ export default function Bookings() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Select value={selectedBay} onValueChange={setSelectedBay}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Quick Filters" /></SelectTrigger>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="All bays" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All bays</SelectItem>
                 {bays.map((bay) => <SelectItem key={bay.id} value={String(bay.id)}>{bay.name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
-            <Button variant="outline" size="icon"><BarChart3 className="h-4 w-4" /></Button>
             <div className="flex items-center rounded-md overflow-hidden border">
-              <Button variant={view === "calendar" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("calendar")}><CalendarDays className="h-4 w-4 mr-2" />Calendar</Button>
-              <Button variant={view === "list" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("list")}><List className="h-4 w-4 mr-2" />List</Button>
+              <Button variant={view === "calendar" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("calendar")}>
+                <CalendarDays className="h-4 w-4 mr-2" />Calendar
+              </Button>
+              <Button variant={view === "list" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("list")}>
+                <List className="h-4 w-4 mr-2" />List
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col xl:flex-row gap-4">
-          <div className="xl:w-[290px] rounded-xl border p-3 bg-muted/20">
-            <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} className="w-full" />
-          </div>
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</h2>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() - 86400000))}><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Today</Button>
-                <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() + 86400000))}><ChevronRight className="h-4 w-4" /></Button>
-              </div>
+        {view === "calendar" && (
+          <div className="flex flex-col xl:flex-row gap-4">
+            {/* Mini calendar */}
+            <div className="xl:w-[290px] rounded-xl border p-3 bg-muted/20 flex-shrink-0">
+              <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} className="w-full" />
             </div>
-            <div className="overflow-x-auto rounded-xl border bg-background">
-              <div className="min-w-[980px]">
-                <div className="grid grid-cols-[72px_repeat(6,minmax(140px,1fr))] border-b bg-muted/30 text-xs font-semibold uppercase tracking-wide">
-                  <div className="px-3 py-2">Time</div>
-                  {(bays.length ? bays : [{ id: 1, name: "Indoor Batting Cage 1" }, { id: 2, name: "Indoor Batting Cage 2" }, { id: 3, name: "Indoor Batting Cage 3" }, { id: 4, name: "MultiSport Golf Sim" }, { id: 5, name: "MultiSport Golf Sim 2" }, { id: 6, name: "Outdoor Batting Cage" }]).slice(0, 6).map((bay) => (
-                    <div key={bay.id} className="px-3 py-2 text-center border-l">{bay.name}</div>
-                  ))}
+
+            {/* Main grid */}
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() - 86400000))}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Today</Button>
+                  <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() + 86400000))}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-                {timeSlots.map((slot, index) => (
-                  <div key={slot} className={`grid grid-cols-[72px_repeat(6,minmax(140px,1fr))] ${index === 4 ? "border-t border-red-200 bg-red-50/40" : "border-b"}`}>
-                    <div className="px-3 py-2 text-xs text-muted-foreground border-r">{slot}</div>
-                    {Array.from({ length: 6 }).map((_, col) => (
-                      <div key={col} className="relative min-h-[46px] border-l">
-                        {index === 4 && col === 0 && <div className="absolute left-0 top-0 h-full w-1 bg-red-400" />}
-                      </div>
-                    ))}
-                  </div>
-                ))}
               </div>
-            </div>
-            {dayBookings.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Bookings on this date</div>
-                <div className="grid gap-2">
-                  {dayBookings.map((b) => (
-                    <div key={b.id} className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
-                      <div>
-                        <div className="font-medium">{b.customerName}</div>
-                        <div className="text-sm text-muted-foreground">{getBayName(b.bayId)} • {toLocal(b.startTime)} — {new Date(b.endTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>{b.status}</Badge>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(b)}><Edit2 className="h-4 w-4" /></Button>
-                      </div>
+
+              {loading && <Skeleton className="h-64 w-full" />}
+
+              {!loading && (
+                <div className="overflow-x-auto rounded-xl border bg-background">
+                  <div style={{ minWidth: `${60 + calendarBays.length * 160}px` }}>
+                    {/* Header row */}
+                    <div
+                      className="grid border-b bg-muted/30 text-xs font-semibold uppercase tracking-wide sticky top-0 z-10"
+                      style={{ gridTemplateColumns: `60px repeat(${calendarBays.length}, minmax(160px, 1fr))` }}
+                    >
+                      <div className="px-3 py-2 text-muted-foreground" />
+                      {calendarBays.map((bay) => (
+                        <div key={bay.id} className="px-3 py-2.5 text-center border-l truncate">{bay.name}</div>
+                      ))}
                     </div>
-                  ))}
+
+                    {/* Time grid body */}
+                    <div className="relative" style={{ height: totalHeight }}>
+                      {/* Hour lines + labels */}
+                      {hours.map((h) => (
+                        <div
+                          key={h}
+                          className="absolute left-0 right-0 border-t border-border/40 flex"
+                          style={{ top: (h - START_HOUR) * SLOT_HEIGHT }}
+                        >
+                          <div className="w-[60px] px-2 text-[11px] text-muted-foreground -mt-2 select-none">
+                            {hourLabel(h)}
+                          </div>
+                          {calendarBays.map((bay) => (
+                            <div
+                              key={bay.id}
+                              className="flex-1 border-l border-border/20"
+                              style={{ height: SLOT_HEIGHT }}
+                            />
+                          ))}
+                        </div>
+                      ))}
+
+                      {/* Current time indicator */}
+                      {todayCurrentOffset !== null && todayCurrentOffset >= 0 && todayCurrentOffset <= totalHeight && (
+                        <div
+                          className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
+                          style={{ top: todayCurrentOffset }}
+                        >
+                          <div className="w-[60px] flex justify-end pr-1">
+                            <div className="w-2 h-2 rounded-full bg-red-500" />
+                          </div>
+                          <div className="flex-1 border-t-2 border-red-500" />
+                        </div>
+                      )}
+
+                      {/* Booking blocks */}
+                      {calendarBays.map((bay, colIdx) => {
+                        const bayBookings = dayBookings.filter((b) => b.bayId === bay.id);
+                        return bayBookings.map((booking) => {
+                          const { top, height } = getBookingStyle(booking);
+                          if (top >= totalHeight || top + height <= 0) return null;
+                          const colorClass = calendarBlockColors[booking.status] ?? "bg-gray-500 text-white";
+                          const colStart = 60 + colIdx * (100 / calendarBays.length) + "%";
+                          return (
+                            <div
+                              key={booking.id}
+                              className={`absolute z-10 rounded-md px-2 py-1 text-xs font-medium cursor-pointer shadow-sm overflow-hidden ${colorClass}`}
+                              style={{
+                                top: top + 1,
+                                height: height,
+                                left: `calc(60px + ${(colIdx / calendarBays.length) * 100}%)`,
+                                width: `calc(${(1 / calendarBays.length) * 100}% - 4px)`,
+                              }}
+                              onClick={() => openEdit(booking)}
+                              title={`${booking.customerName} — ${getBayName(booking.bayId)}`}
+                            >
+                              <div className="font-semibold truncate leading-tight">{booking.customerName}</div>
+                              {height > 30 && (
+                                <div className="opacity-80 truncate leading-tight mt-0.5">
+                                  {new Date(booking.startTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                                  {" – "}
+                                  {new Date(booking.endTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        });
+                      })}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {!loading && dayBookings.length === 0 && (
+                <div className="border border-dashed rounded-xl p-8 text-center mt-3">
+                  <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No bookings on this date. <button className="text-primary underline underline-offset-2" onClick={openCreate}>Create one →</button></p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {loading && (
+      {loading && view === "list" && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
         </div>
@@ -315,7 +427,9 @@ export default function Bookings() {
                   <TableCell className="text-sm">{getBayName(b.bayId)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{toLocal(b.startTime)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{toLocal(b.endTime)}</TableCell>
-                  <TableCell><Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>{b.status}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>{b.status}</Badge>
+                  </TableCell>
                   <TableCell className="text-sm">{b.totalPrice ? `$${Number(b.totalPrice).toFixed(2)}` : "—"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

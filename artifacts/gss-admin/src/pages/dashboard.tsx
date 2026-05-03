@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LayoutGrid, Users, CreditCard, CalendarDays, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LayoutGrid, Users, CreditCard, CalendarDays, TrendingUp, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Link } from "wouter";
 
 interface DashboardStats {
   totalCustomers: number;
@@ -11,62 +14,65 @@ interface DashboardStats {
   todayBookings: number;
 }
 
+interface Booking {
+  id: number;
+  customerName: string;
+  bayId: number | null;
+  startTime: string;
+  endTime: string;
+  status: string;
+  totalPrice: string | null;
+}
+
+interface Bay {
+  id: number;
+  name: string;
+}
+
+const statusColors: Record<string, string> = {
+  confirmed: "bg-green-50 text-green-700 border-green-200",
+  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  cancelled: "bg-red-50 text-red-500 border-red-200",
+  completed: "bg-blue-50 text-blue-700 border-blue-200",
+};
+
 export default function Dashboard() {
   const { user, tenant } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bays, setBays] = useState<Bay[]>([]);
 
   useEffect(() => {
-    fetch("/api/dashboard", { credentials: "include" })
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed to load dashboard");
-        return r.json();
-      })
-      .then((data) => {
-        setStats(data);
+    Promise.all([
+      fetch("/api/dashboard", { credentials: "include" }).then((r) => r.ok ? r.json() : Promise.reject("Failed")),
+      fetch("/api/bookings", { credentials: "include" }).then((r) => r.ok ? r.json() : []),
+      fetch("/api/bays", { credentials: "include" }).then((r) => r.ok ? r.json() : []),
+    ])
+      .then(([dashData, bookingData, bayData]) => {
+        setStats(dashData);
+        setBookings(bookingData.slice(0, 8));
+        setBays(bayData);
         setLoading(false);
       })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
+      .catch((e) => { setError(String(e)); setLoading(false); });
   }, []);
 
+  const getBayName = (id: number | null) => {
+    if (id == null) return "—";
+    return bays.find((b) => b.id === id)?.name ?? `Bay #${id}`;
+  };
+
   const statCards = [
-    {
-      label: "Bays",
-      value: stats?.totalBays ?? 0,
-      icon: LayoutGrid,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-    },
-    {
-      label: "Today's Bookings",
-      value: stats?.todayBookings ?? 0,
-      icon: CalendarDays,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
-    },
-    {
-      label: "Customers",
-      value: stats?.totalCustomers ?? 0,
-      icon: Users,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      label: "Active Memberships",
-      value: stats?.activeMemberships ?? 0,
-      icon: CreditCard,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
+    { label: "Bays", value: stats?.totalBays ?? 0, icon: LayoutGrid, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Today's Bookings", value: stats?.todayBookings ?? 0, icon: CalendarDays, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { label: "Customers", value: stats?.totalCustomers ?? 0, icon: Users, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Active Memberships", value: stats?.activeMemberships ?? 0, icon: CreditCard, color: "text-amber-500", bg: "bg-amber-500/10" },
   ];
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
@@ -76,7 +82,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <Card key={card.label}>
@@ -101,8 +106,47 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Getting started / empty state */}
-      {!loading && !error && stats && stats.totalBays === 0 && (
+      {!loading && !error && bookings.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Recent Bookings</CardTitle>
+            <Link href="/admin/bookings">
+              <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground">
+                View all <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              {bookings.map((b) => (
+                <div key={b.id} className="flex items-center justify-between px-6 py-3 hover:bg-muted/20 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      {b.customerName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{b.customerName}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {getBayName(b.bayId)} · {new Date(b.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })} {new Date(b.startTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {b.totalPrice && (
+                      <span className="text-sm font-semibold">${Number(b.totalPrice).toFixed(2)}</span>
+                    )}
+                    <Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>
+                      {b.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && !error && bookings.length === 0 && stats && stats.totalBays === 0 && (
         <Card className="border-dashed">
           <CardContent className="pt-8 pb-8 text-center space-y-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -113,13 +157,30 @@ export default function Dashboard() {
               Start by adding your bays, then invite customers and create bookings. Your dashboard stats will populate as you use the platform.
             </p>
             <div className="flex items-center justify-center gap-3 pt-2">
-              <a href="/admin/bays" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
+              <Link href="/admin/bays" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
                 Add bays →
-              </a>
-              <a href="/admin/customers" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
+              </Link>
+              <Link href="/admin/customers" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
                 Add customers →
-              </a>
+              </Link>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && !error && bookings.length === 0 && stats && stats.totalBays > 0 && (
+        <Card className="border-dashed">
+          <CardContent className="pt-8 pb-8 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <CalendarDays className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg">No bookings yet</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Create your first booking to start tracking bay usage.
+            </p>
+            <Link href="/admin/bookings">
+              <Button size="sm" className="mt-2">Create a booking</Button>
+            </Link>
           </CardContent>
         </Card>
       )}

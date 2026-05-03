@@ -43,7 +43,7 @@
 | GET/POST | `/api/memberships` | List / create memberships |
 | GET/PUT/DELETE | `/api/memberships/:id` | Get / update / delete membership |
 | GET/PUT | `/api/tenant` | Get / update current tenant settings |
-| GET | `/api/employees` | List users for current tenant |
+| GET/POST/DELETE | `/api/employees` | List / create / remove team members |
 
 ## DB Schema Notes
 
@@ -57,13 +57,17 @@
 
 | Page | Status | Notes |
 |------|--------|-------|
-| Dashboard | ✅ Live | Wired to `/api/dashboard` |
+| Dashboard | ✅ Live | Stats + recent bookings widget wired to API |
 | Bays | ✅ Live | Full CRUD |
 | Customers | ✅ Live | Full CRUD |
-| Bookings | ✅ Live | Full CRUD with datetime picker |
+| Bookings | ✅ Live | Full CRUD + calendar grid rendering real booking blocks (6 AM–10 PM) |
 | Memberships | ✅ Live | Full CRUD |
+| Employees / Team | ✅ Live | Full CRUD — add/remove team members via `/api/employees` |
 | Facility Settings | ✅ Live | Wired to `/api/tenant` |
-| Team | ✅ Live | Wired to `/api/employees` |
+| Notifications | ✅ Live | Per-template editor with subject/body + saveable toggles |
+| Legal | ✅ Live | Tabbed editor: Terms, Waiver, Privacy Policy |
+| Audits | ✅ Live | Audit log page with search/filter (client-side, no DB table yet) |
+| Support | ✅ Live | FAQ + contact form at `/admin/org/support` |
 | Reports | ✅ UI | Static report category browser |
 | POS | 🚧 Coming Soon | Preview with planned features |
 | Passes | 🚧 Coming Soon | Preview with planned features |
@@ -77,7 +81,6 @@ All at `/` path:
 - `/about` — About (no false network claims)
 - `/software` — Feature breakdown
 - `/contact` — Demo booking form
-- `/help` — Help centre
 
 ## Auth Flow
 
@@ -86,13 +89,6 @@ All at `/` path:
 - Cookie: `simvault.sid`, httpOnly, 7-day expiry
 - Protected routes redirect to `/login?returnTo=<path>` and redirect back after login
 - `SESSION_SECRET` stored in Replit secrets
-
-## Deployment
-
-- **Vercel**: `vercel.json` at root configures build for `artifacts/gss-admin`
-  - Build command: `pnpm --filter @workspace/gss-admin run build`
-  - Output: `artifacts/gss-admin/dist/public`
-- **GitHub**: https://github.com/thespiceoflifemedia/simvault
 
 ## Environment Variables
 

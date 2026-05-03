@@ -3,8 +3,6 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
   Users,
-  BookOpen,
-  ClipboardCheck,
   LifeBuoy,
   Settings,
   FileBarChart,
@@ -20,7 +18,7 @@ import {
   Bell,
   Menu,
   LogOut,
-  ChevronDown,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -56,6 +54,7 @@ const facilityNav = [
   { name: "Integrations", path: "/admin/integrations", icon: Puzzle },
   { name: "Notices", path: "/admin/notifications", icon: Bell },
   { name: "Legal", path: "/admin/legal", icon: FileText },
+  { name: "Audits", path: "/admin/audits", icon: Shield },
   { name: "Settings", path: "/admin/details", icon: Settings },
   { name: "Support", path: "/admin/org/support", icon: LifeBuoy },
 ];

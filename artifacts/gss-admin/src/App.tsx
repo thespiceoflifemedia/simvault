@@ -24,6 +24,8 @@ import Legal from "@/pages/legal";
 import Customers from "@/pages/customers";
 import Schedules from "@/pages/schedules";
 import Notifications from "@/pages/notifications";
+import Audits from "@/pages/audits";
+import Support from "@/pages/support";
 
 import Home from "@/pages/marketing/home";
 import About from "@/pages/marketing/about";
@@ -54,6 +56,8 @@ function AdminRouter() {
           <Route path="/admin/customers" component={Customers} />
           <Route path="/admin/schedules" component={Schedules} />
           <Route path="/admin/notifications" component={Notifications} />
+          <Route path="/admin/audits" component={Audits} />
+          <Route path="/admin/org/support" component={Support} />
           <Route component={NotFound} />
         </Switch>
       </Layout>
