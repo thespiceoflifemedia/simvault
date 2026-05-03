@@ -6,3 +6,9 @@ id = "RzVRazaundNoao8OYHX6J"
 uri = "file://artifacts/gss-admin/src/assets/laptop-mockup.png"
 type = "image"
 title = "Laptop mockup with dashboard"
+
+[[generated]]
+id = "efsS78hnQmnMoA5AkSL9F"
+uri = "file://artifacts/gss-admin/public/hero-dashboard.png"
+type = "image"
+title = "Dashboard UI hero image with transparency"

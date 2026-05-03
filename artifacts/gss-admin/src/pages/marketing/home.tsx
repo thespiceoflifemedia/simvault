@@ -43,105 +43,12 @@ export default function Home() {
               variants={fadeIn}
               className="order-2 lg:order-1"
             >
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/20 bg-[#0d1220]/80 backdrop-blur-sm">
-                {/* Browser chrome */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-[#111827]/90 border-b border-white/10">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/70" />
-                  </div>
-                  <div className="flex-1 mx-4 bg-white/5 rounded-md px-3 py-1 text-xs text-white/30 font-mono">
-                    app.simvault.io/dashboard
-                  </div>
-                </div>
-                {/* Dashboard content */}
-                <div className="p-4 space-y-3">
-                  {/* Top stats row */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: "Bays Active", value: "–/–", color: "#3b82f6" },
-                      { label: "Today's Revenue", value: "$–,–––", color: "#22c55e" },
-                      { label: "Members", value: "–––", color: "#a78bfa" },
-                    ].map((stat) => (
-                      <div key={stat.label} className="bg-white/5 rounded-lg p-2.5 border border-white/8">
-                        <div className="text-[10px] text-white/40 mb-1">{stat.label}</div>
-                        <div className="text-sm font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Booking grid */}
-                  <div className="bg-white/5 rounded-lg border border-white/8 p-3">
-                    <div className="text-[10px] text-white/40 mb-2 font-medium uppercase tracking-wide">Bay Schedule — Today</div>
-                    <div className="space-y-1.5">
-                      {[
-                        { bay: "Bay 1", slots: [1,1,0,1,1,1], name: "" },
-                        { bay: "Bay 2", slots: [0,1,1,1,0,1], name: "" },
-                        { bay: "Bay 3", slots: [1,0,1,1,1,0], name: "" },
-                        { bay: "Bay 4", slots: [1,1,1,0,1,1], name: "" },
-                      ].map((row) => (
-                        <div key={row.bay} className="flex items-center gap-2">
-                          <div className="text-[9px] text-white/30 w-8 shrink-0">{row.bay}</div>
-                          <div className="flex gap-0.5 flex-1">
-                            {row.slots.map((on, i) => (
-                              <div
-                                key={i}
-                                className="flex-1 h-4 rounded-sm"
-                                style={{
-                                  background: on
-                                    ? `rgba(59,130,246,${0.5 + i * 0.05})`
-                                    : "rgba(255,255,255,0.04)",
-                                }}
-                              />
-                            ))}
-                          </div>
-                          <div className="text-[9px] text-white/25 w-12 text-right shrink-0">{row.name}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      {["9am","11am","1pm","3pm","5pm","7pm"].map(t => (
-                        <div key={t} className="flex-1 text-center text-[8px] text-white/20">{t}</div>
-                      ))}
-                    </div>
-                  </div>
-                  {/* Bottom row: mini chart + recent bookings */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-white/5 rounded-lg border border-white/8 p-2.5">
-                      <div className="text-[10px] text-white/40 mb-2">Weekly Revenue</div>
-                      <div className="flex items-end gap-1 h-12">
-                        {[40, 65, 50, 80, 70, 90, 75].map((h, i) => (
-                          <div
-                            key={i}
-                            className="flex-1 rounded-sm"
-                            style={{
-                              height: `${h}%`,
-                              background: i === 5
-                                ? "rgba(59,130,246,0.9)"
-                                : "rgba(59,130,246,0.3)",
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-white/5 rounded-lg border border-white/8 p-2.5">
-                      <div className="text-[10px] text-white/40 mb-2">Recent Bookings</div>
-                      <div className="space-y-1.5">
-                        {[
-                          { name: "Member", time: "– –:– –", bay: "Bay –" },
-                          { name: "Member", time: "– –:– –", bay: "Bay –" },
-                          { name: "Member", time: "– –:– –", bay: "Bay –" },
-                        ].map((b, i) => (
-                          <div key={i} className="flex justify-between items-center">
-                            <span className="text-[9px] text-white/30">{b.name}</span>
-                            <span className="text-[9px] text-white/20">{b.time}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#080b14]/40 via-transparent to-transparent pointer-events-none" />
+              <div className="relative">
+                <img 
+                  src="/hero-dashboard.png" 
+                  alt="SimVault Dashboard Interface" 
+                  className="w-full h-auto drop-shadow-2xl"
+                />
               </div>
             </motion.div>
 
