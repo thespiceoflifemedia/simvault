@@ -52,7 +52,10 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
             <a href="#" className="text-white/80 hover:text-blue-400 transition-colors">Help Centre</a>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
+              Client Login
+            </Link>
             <Link href="/contact">
               <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-6">
                 Book a Demo
