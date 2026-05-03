@@ -191,7 +191,7 @@ export default function Details() {
             </p>
             <div className="bg-muted/50 border rounded-lg p-4 font-mono text-sm space-y-1">
               <div className="text-muted-foreground">Base URL</div>
-              <div className="text-foreground font-semibold">{window.location.origin}/api</div>
+              <div className="text-foreground font-semibold">/api</div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               {["/api/bays", "/api/bookings", "/api/customers", "/api/memberships"].map((ep) => (
