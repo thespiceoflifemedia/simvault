@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, CalendarDays, Edit2, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Search, Plus, CalendarDays, Edit2, Trash2, ChevronLeft, ChevronRight, Filter, BarChart3, List, CalendarRange } from "lucide-react";
 
 interface Booking {
   id: number;
@@ -66,6 +67,10 @@ const emptyForm = {
   totalPrice: "",
 };
 
+const timeSlots = [
+  "1:00 AM","1:30 AM","2:00 AM","2:30 AM","3:00 AM","3:30 AM","4:00 AM","4:30 AM","5:00 AM","5:30 AM","6:00 AM","6:30 AM","7:00 AM","7:30 AM"
+];
+
 export default function Bookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bays, setBays] = useState<Bay[]>([]);
@@ -77,6 +82,9 @@ export default function Bookings() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedBay, setSelectedBay] = useState<string>("all");
 
   const loadData = () => {
     setLoading(true);
@@ -99,12 +107,19 @@ export default function Bookings() {
 
   const filtered = bookings.filter((b) => {
     const q = search.toLowerCase();
+    const bayMatch = selectedBay === "all" || String(b.bayId ?? "") === selectedBay;
     return (
+      bayMatch &&
       b.customerName.toLowerCase().includes(q) ||
       (b.customerEmail ?? "").toLowerCase().includes(q) ||
       getBayName(b.bayId).toLowerCase().includes(q)
     );
   });
+
+  const dayBookings = useMemo(() => {
+    const dateKey = selectedDate.toDateString();
+    return filtered.filter((b) => new Date(b.startTime).toDateString() === dateKey);
+  }, [filtered, selectedDate]);
 
   const openCreate = () => {
     setEditingBooking(null);
@@ -161,34 +176,109 @@ export default function Bookings() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Booking Calendar</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Schedule bays, search bookings, and manage events in one view</p>
+        </div>
         <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Create Booking
+          <Plus className="mr-2 h-4 w-4" /> Create Booking / Event
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 max-w-sm">
-        <div className="relative w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search bookings..."
-            className="pl-8 bg-card"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="rounded-xl border bg-card p-4 space-y-4">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+          <div className="relative w-full lg:max-w-md">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by name, email or phone"
+              className="pl-9 bg-background"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={selectedBay} onValueChange={setSelectedBay}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Quick Filters" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All bays</SelectItem>
+                {bays.map((bay) => <SelectItem key={bay.id} value={String(bay.id)}>{bay.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon"><BarChart3 className="h-4 w-4" /></Button>
+            <div className="flex items-center rounded-md overflow-hidden border">
+              <Button variant={view === "calendar" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("calendar")}><CalendarDays className="h-4 w-4 mr-2" />Calendar</Button>
+              <Button variant={view === "list" ? "default" : "ghost"} size="sm" className="rounded-none" onClick={() => setView("list")}><List className="h-4 w-4 mr-2" />List</Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col xl:flex-row gap-4">
+          <div className="xl:w-[290px] rounded-xl border p-3 bg-muted/20">
+            <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} className="w-full" />
+          </div>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">{selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</h2>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() - 86400000))}><ChevronLeft className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Today</Button>
+                <Button variant="outline" size="icon" onClick={() => setSelectedDate((d) => new Date(d.getTime() + 86400000))}><ChevronRight className="h-4 w-4" /></Button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded-xl border bg-background">
+              <div className="min-w-[980px]">
+                <div className="grid grid-cols-[72px_repeat(6,minmax(140px,1fr))] border-b bg-muted/30 text-xs font-semibold uppercase tracking-wide">
+                  <div className="px-3 py-2">Time</div>
+                  {(bays.length ? bays : [{ id: 1, name: "Indoor Batting Cage 1" }, { id: 2, name: "Indoor Batting Cage 2" }, { id: 3, name: "Indoor Batting Cage 3" }, { id: 4, name: "MultiSport Golf Sim" }, { id: 5, name: "MultiSport Golf Sim 2" }, { id: 6, name: "Outdoor Batting Cage" }]).slice(0, 6).map((bay) => (
+                    <div key={bay.id} className="px-3 py-2 text-center border-l">{bay.name}</div>
+                  ))}
+                </div>
+                {timeSlots.map((slot, index) => (
+                  <div key={slot} className={`grid grid-cols-[72px_repeat(6,minmax(140px,1fr))] ${index === 4 ? "border-t border-red-200 bg-red-50/40" : "border-b"}`}>
+                    <div className="px-3 py-2 text-xs text-muted-foreground border-r">{slot}</div>
+                    {Array.from({ length: 6 }).map((_, col) => (
+                      <div key={col} className="relative min-h-[46px] border-l">
+                        {index === 4 && col === 0 && <div className="absolute left-0 top-0 h-full w-1 bg-red-400" />}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {dayBookings.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">Bookings on this date</div>
+                <div className="grid gap-2">
+                  {dayBookings.map((b) => (
+                    <div key={b.id} className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
+                      <div>
+                        <div className="font-medium">{b.customerName}</div>
+                        <div className="text-sm text-muted-foreground">{getBayName(b.bayId)} • {toLocal(b.startTime)} — {new Date(b.endTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>{b.status}</Badge>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(b)}><Edit2 className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {loading && (
         <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
         </div>
       )}
 
       {error && <p className="text-destructive text-sm">{error}</p>}
 
-      {!loading && !error && bookings.length === 0 && (
+      {!loading && !error && view === "list" && bookings.length === 0 && (
         <div className="border border-dashed rounded-xl p-12 text-center">
           <CalendarDays className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <h3 className="font-semibold mb-1">No bookings yet</h3>
@@ -197,7 +287,7 @@ export default function Bookings() {
         </div>
       )}
 
-      {!loading && !error && bookings.length > 0 && (
+      {!loading && !error && view === "list" && bookings.length > 0 && (
         <div className="border rounded-md bg-card">
           <Table>
             <TableHeader className="bg-muted/50">
@@ -214,47 +304,32 @@ export default function Bookings() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                    No bookings match "{search}"
+                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">No bookings match "{search}"</TableCell>
+                </TableRow>
+              ) : filtered.map((b) => (
+                <TableRow key={b.id} className="hover:bg-muted/30">
+                  <TableCell>
+                    <div className="font-medium">{b.customerName}</div>
+                    {b.customerEmail && <div className="text-xs text-muted-foreground">{b.customerEmail}</div>}
+                  </TableCell>
+                  <TableCell className="text-sm">{getBayName(b.bayId)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{toLocal(b.startTime)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{toLocal(b.endTime)}</TableCell>
+                  <TableCell><Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>{b.status}</Badge></TableCell>
+                  <TableCell className="text-sm">{b.totalPrice ? `$${Number(b.totalPrice).toFixed(2)}` : "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(b)}><Edit2 className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(b.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                filtered.map((b) => (
-                  <TableRow key={b.id} className="hover:bg-muted/30">
-                    <TableCell>
-                      <div className="font-medium">{b.customerName}</div>
-                      {b.customerEmail && <div className="text-xs text-muted-foreground">{b.customerEmail}</div>}
-                    </TableCell>
-                    <TableCell className="text-sm">{getBayName(b.bayId)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{toLocal(b.startTime)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{toLocal(b.endTime)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`${statusColors[b.status] ?? ""} uppercase text-[10px] tracking-wider`}>
-                        {b.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {b.totalPrice ? `$${Number(b.totalPrice).toFixed(2)}` : "—"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(b)}>
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(b.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
       )}
 
-      {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -276,9 +351,7 @@ export default function Bookings() {
               <Select value={form.bayId} onValueChange={(v) => setForm({ ...form, bayId: v })}>
                 <SelectTrigger><SelectValue placeholder="Select a bay" /></SelectTrigger>
                 <SelectContent>
-                  {bays.map((bay) => (
-                    <SelectItem key={bay.id} value={String(bay.id)}>{bay.name}</SelectItem>
-                  ))}
+                  {bays.map((bay) => <SelectItem key={bay.id} value={String(bay.id)}>{bay.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -324,7 +397,6 @@ export default function Bookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete dialog */}
       <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete booking?</DialogTitle></DialogHeader>
