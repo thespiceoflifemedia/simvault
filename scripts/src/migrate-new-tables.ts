@@ -5,6 +5,177 @@ async function migrate() {
   try {
     await client.query("BEGIN");
 
+    // Core tables (created by drizzle-kit push, included here for completeness)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tenants (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        phone TEXT,
+        address TEXT,
+        plan TEXT NOT NULL DEFAULT 'starter',
+        active BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'staff',
+        phone TEXT,
+        position TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS customers (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bays (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT,
+        simulator TEXT,
+        active BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        bay_id INTEGER REFERENCES bays(id) ON DELETE SET NULL,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name TEXT NOT NULL,
+        customer_email TEXT,
+        start_time TIMESTAMP NOT NULL,
+        end_time TIMESTAMP NOT NULL,
+        status TEXT NOT NULL DEFAULT 'confirmed',
+        notes TEXT,
+        total_price TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS memberships (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name TEXT NOT NULL,
+        customer_email TEXT,
+        plan TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        start_date TIMESTAMP NOT NULL,
+        end_date TIMESTAMP,
+        auto_renew BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS passes (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        price NUMERIC(10, 2) NOT NULL,
+        remaining INTEGER NOT NULL,
+        expires_at TIMESTAMP,
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS discount_codes (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        code TEXT NOT NULL,
+        name TEXT,
+        type TEXT NOT NULL DEFAULT 'percentage',
+        value NUMERIC(10, 2) NOT NULL,
+        max_uses INTEGER,
+        uses INTEGER NOT NULL DEFAULT 0,
+        expires_at TIMESTAMP,
+        active BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schedules (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        bay_id INTEGER REFERENCES bays(id) ON DELETE CASCADE,
+        day_of_week INTEGER NOT NULL,
+        open_time TEXT NOT NULL,
+        close_time TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS loyalty_points (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name TEXT NOT NULL,
+        points_balance INTEGER NOT NULL DEFAULT 0,
+        total_earned INTEGER NOT NULL DEFAULT 0,
+        total_redeemed INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pos_orders (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_name TEXT NOT NULL,
+        items JSONB NOT NULL DEFAULT '[]',
+        subtotal NUMERIC(10, 2) NOT NULL DEFAULT 0,
+        tax NUMERIC(10, 2) NOT NULL DEFAULT 0,
+        total NUMERIC(10, 2) NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'open',
+        payment_method TEXT,
+        notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS notification_templates (
         id SERIAL PRIMARY KEY,
@@ -63,8 +234,20 @@ async function migrate() {
       )
     `);
 
+    // Session table for connect-pg-simple
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_sessions (
+        sid TEXT NOT NULL PRIMARY KEY,
+        sess JSONB NOT NULL,
+        expire TIMESTAMP(6) NOT NULL
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS user_sessions_expire_idx ON user_sessions (expire)
+    `);
+
     await client.query("COMMIT");
-    console.log("Migration complete: created notification_templates, legal_documents, forms, form_submissions");
+    console.log("Migration complete: all tables created");
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Migration failed:", err);
