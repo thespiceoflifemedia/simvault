@@ -1,9 +1,16 @@
 {
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm --filter @workspace/gss-admin run build",
+  "buildCommand": "pnpm --filter @workspace/gss-admin run build && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/scripts run migrate-new-tables",
   "outputDirectory": "artifacts/gss-admin/dist/public",
   "framework": null,
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
