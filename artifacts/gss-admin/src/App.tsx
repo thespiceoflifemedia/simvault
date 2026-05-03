@@ -22,6 +22,7 @@ import Employees from "@/pages/employees";
 import Integrations from "@/pages/integrations";
 import Legal from "@/pages/legal";
 import Customers from "@/pages/customers";
+import CustomerProfile from "@/pages/customer-profile";
 import Schedules from "@/pages/schedules";
 import Notifications from "@/pages/notifications";
 import Audits from "@/pages/audits";
@@ -53,6 +54,7 @@ function AdminRouter() {
           <Route path="/admin/employees" component={Employees} />
           <Route path="/admin/integrations" component={Integrations} />
           <Route path="/admin/legal" component={Legal} />
+          <Route path="/admin/customers/:id" component={CustomerProfile} />
           <Route path="/admin/customers" component={Customers} />
           <Route path="/admin/schedules" component={Schedules} />
           <Route path="/admin/notifications" component={Notifications} />

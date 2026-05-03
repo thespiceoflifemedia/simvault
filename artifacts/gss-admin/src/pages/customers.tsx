@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Search, Plus, Users, Edit2, Trash2 } from "lucide-react";
+import { Search, Plus, Users, Edit2, Trash2, ExternalLink } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface Customer {
   id: number;
@@ -18,6 +19,7 @@ interface Customer {
 const emptyForm = { name: "", email: "", phone: "", notes: "" };
 
 export default function Customers() {
+  const [, navigate] = useLocation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,17 +148,35 @@ export default function Customers() {
                 </TableRow>
               ) : (
                 filtered.map((c) => (
-                  <TableRow key={c.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableRow
+                    key={c.id}
+                    className="hover:bg-muted/30 cursor-pointer"
+                    onClick={() => navigate(`/admin/customers/${c.id}`)}
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="hover:text-primary transition-colors">{c.name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{c.email}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{c.phone ?? "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground max-w-xs truncate">{c.notes ?? "—"}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}>
+                        <Button
+                          variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/customers/${c.id}`); }}
+                          title="View profile"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openEdit(c); }}>
                           <Edit2 className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(c.id)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(c.id); }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

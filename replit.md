@@ -57,9 +57,10 @@
 
 | Page | Status | Notes |
 |------|--------|-------|
-| Dashboard | ✅ Live | Stats + recent bookings widget wired to API |
+| Dashboard | ✅ Live | Stats + 7-day revenue bar chart (Recharts) + live bay status panel + recent bookings |
 | Bays | ✅ Live | Full CRUD |
-| Customers | ✅ Live | Full CRUD |
+| Customers | ✅ Live | Full CRUD — rows are clickable, navigates to customer profile |
+| Customer Profile | ✅ Live | `/admin/customers/:id` — contact info, booking history table, memberships, stats cards, edit/delete |
 | Bookings | ✅ Live | Full CRUD + calendar grid rendering real booking blocks (6 AM–10 PM) |
 | Memberships | ✅ Live | Full CRUD |
 | Employees / Team | ✅ Live | Full CRUD — add/remove team members via `/api/employees` |

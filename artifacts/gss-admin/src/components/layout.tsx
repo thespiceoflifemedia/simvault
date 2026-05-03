@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
   Users,
+  UserCog,
   LifeBuoy,
   Settings,
   FileBarChart,
@@ -49,7 +50,7 @@ const facilityNav = [
   { name: "Passes", path: "/admin/passes", icon: Ticket },
   { name: "Discounts", path: "/admin/discount-codes", icon: Tag },
   { name: "Reports", path: "/admin/reports", icon: FileBarChart },
-  { name: "Employees", path: "/admin/employees", icon: Users },
+  { name: "Employees", path: "/admin/employees", icon: UserCog },
   { name: "Schedules", path: "/admin/schedules", icon: Clock },
   { name: "Integrations", path: "/admin/integrations", icon: Puzzle },
   { name: "Notices", path: "/admin/notifications", icon: Bell },
