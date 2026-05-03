@@ -60,9 +60,9 @@ export default function Home() {
                   {/* Top stats row */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { label: "Bays Active", value: "7/8", color: "#3b82f6" },
-                      { label: "Today's Revenue", value: "$1,240", color: "#22c55e" },
-                      { label: "Members", value: "184", color: "#a78bfa" },
+                      { label: "Bays Active", value: "–/–", color: "#3b82f6" },
+                      { label: "Today's Revenue", value: "$–,–––", color: "#22c55e" },
+                      { label: "Members", value: "–––", color: "#a78bfa" },
                     ].map((stat) => (
                       <div key={stat.label} className="bg-white/5 rounded-lg p-2.5 border border-white/8">
                         <div className="text-[10px] text-white/40 mb-1">{stat.label}</div>
@@ -75,10 +75,10 @@ export default function Home() {
                     <div className="text-[10px] text-white/40 mb-2 font-medium uppercase tracking-wide">Bay Schedule — Today</div>
                     <div className="space-y-1.5">
                       {[
-                        { bay: "Bay 1", slots: [1,1,0,1,1,1], name: "J. Morris" },
-                        { bay: "Bay 2", slots: [0,1,1,1,0,1], name: "T. Walsh" },
-                        { bay: "Bay 3", slots: [1,0,1,1,1,0], name: "Open" },
-                        { bay: "Bay 4", slots: [1,1,1,0,1,1], name: "R. Chen" },
+                        { bay: "Bay 1", slots: [1,1,0,1,1,1], name: "" },
+                        { bay: "Bay 2", slots: [0,1,1,1,0,1], name: "" },
+                        { bay: "Bay 3", slots: [1,0,1,1,1,0], name: "" },
+                        { bay: "Bay 4", slots: [1,1,1,0,1,1], name: "" },
                       ].map((row) => (
                         <div key={row.bay} className="flex items-center gap-2">
                           <div className="text-[9px] text-white/30 w-8 shrink-0">{row.bay}</div>
@@ -128,13 +128,13 @@ export default function Home() {
                       <div className="text-[10px] text-white/40 mb-2">Recent Bookings</div>
                       <div className="space-y-1.5">
                         {[
-                          { name: "Alex T.", time: "2:00 PM", bay: "Bay 3" },
-                          { name: "Sam K.", time: "3:30 PM", bay: "Bay 1" },
-                          { name: "Jordan M.", time: "5:00 PM", bay: "Bay 5" },
-                        ].map((b) => (
-                          <div key={b.name} className="flex justify-between items-center">
-                            <span className="text-[9px] text-white/60">{b.name}</span>
-                            <span className="text-[9px] text-[#3b82f6]/70">{b.time}</span>
+                          { name: "Member", time: "– –:– –", bay: "Bay –" },
+                          { name: "Member", time: "– –:– –", bay: "Bay –" },
+                          { name: "Member", time: "– –:– –", bay: "Bay –" },
+                        ].map((b, i) => (
+                          <div key={i} className="flex justify-between items-center">
+                            <span className="text-[9px] text-white/30">{b.name}</span>
+                            <span className="text-[9px] text-white/20">{b.time}</span>
                           </div>
                         ))}
                       </div>
