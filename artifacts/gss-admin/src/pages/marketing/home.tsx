@@ -153,7 +153,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 bg-[#3b82f6]/10 border border-[#3b82f6]/30 rounded-full px-4 py-1.5 text-sm text-blue-400 font-medium">
                 <Zap className="w-3.5 h-3.5" />
-                All-in-one sim facility platform
+                All-in-one golf simulator facility platform
               </div>
               <h1 className="font-heading text-5xl md:text-[64px] leading-[1.1] font-bold text-white tracking-tight">
                 Run Your Sim Facility Smarter
