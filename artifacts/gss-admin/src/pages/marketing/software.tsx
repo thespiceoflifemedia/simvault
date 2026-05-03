@@ -15,6 +15,19 @@ const staggerChildren = {
   }
 };
 
+const apiRoutes = [
+  { method: "GET", path: "/api/healthz", description: "Server health check" },
+  { method: "POST", path: "/api/auth/register", description: "Create tenant + owner account" },
+  { method: "POST", path: "/api/auth/login", description: "Start session" },
+  { method: "POST", path: "/api/auth/logout", description: "End session" },
+  { method: "GET", path: "/api/auth/me", description: "Current user session" },
+  { method: "GET", path: "/api/dashboard", description: "Tenant dashboard stats" },
+  { method: "GET", path: "/api/bays", description: "List bays" },
+  { method: "GET", path: "/api/bookings", description: "List bookings" },
+  { method: "GET", path: "/api/customers", description: "List customers" },
+  { method: "GET", path: "/api/memberships", description: "List memberships" }
+];
+
 export default function Software() {
   const features = [
     {
@@ -107,6 +120,47 @@ export default function Software() {
                 <div className="text-4xl mb-6">{feature.icon}</div>
                 <h3 className="text-2xl font-heading font-bold mb-4">{feature.title}</h3>
                 <p className="text-white/50 leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-[#050710] border-y border-white/10">
+        <div className="container mx-auto px-4 md:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="max-w-4xl mx-auto text-center mb-14"
+          >
+            <h2 className="font-heading text-4xl md:text-[48px] font-bold mb-6">
+              Built-in API, ready for integrations
+            </h2>
+            <p className="text-xl text-white/60 leading-relaxed">
+              SimVault ships with its own backend API so your apps, dashboards, and automations can connect without depending on a third-party platform.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerChildren}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto"
+          >
+            {apiRoutes.map((route) => (
+              <motion.div
+                key={route.path}
+                variants={fadeIn}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4"
+              >
+                <div>
+                  <div className="text-xs uppercase tracking-[0.2em] text-[#3b82f6] font-semibold">{route.method}</div>
+                  <div className="font-mono text-sm text-white mt-1">{route.path}</div>
+                </div>
+                <div className="text-sm text-white/50 text-right">{route.description}</div>
               </motion.div>
             ))}
           </motion.div>

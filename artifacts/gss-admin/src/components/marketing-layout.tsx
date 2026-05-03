@@ -101,6 +101,7 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
                 <li><Link href="/contact" className="hover:text-[#3b82f6] transition-colors">Book a Demo</Link></li>
                 <li><Link href="/contact" className="hover:text-[#3b82f6] transition-colors">Onboarding</Link></li>
                 <li><Link href="/contact" className="hover:text-[#3b82f6] transition-colors">Release Notes</Link></li>
+                <li><a href="/api/healthz" className="hover:text-[#3b82f6] transition-colors">API Status</a></li>
                 <li><a href="#" className="hover:text-[#3b82f6] transition-colors">Help Centre</a></li>
               </ul>
             </div>
