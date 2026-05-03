@@ -53,7 +53,7 @@ export default function About() {
                   We set out to build an all-in-one platform tailored specifically to the needs of sim facility operators. Every feature was shaped by conversations with real owners running real facilities.
                 </p>
                 <p>
-                  Today, SimVault powers facilities across North America — helping operators spend less time on admin and more time delivering great experiences to their guests.
+                  SimVault is purpose-built for sim facility operators — helping you spend less time on admin and more time delivering great experiences to your guests.
                 </p>
               </div>
             </motion.div>
@@ -136,11 +136,18 @@ export default function About() {
             <p className="text-xl text-white/60 mb-10">
               Join the growing network of facilities using SimVault to run smarter operations.
             </p>
-            <Link href="/contact">
-              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-10 py-6 text-lg">
-                Book a Demo
-              </Button>
-            </Link>
+            <div className="flex items-center justify-center gap-4">
+              <Link href="/contact">
+                <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold rounded-full px-10 py-6 text-lg">
+                  Book a Demo
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-full px-10 py-6 text-lg">
+                  Client Login
+                </Button>
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>

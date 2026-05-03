@@ -1,122 +1,136 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LayoutGrid, Users, CreditCard, CalendarDays, TrendingUp } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
-const customerData = [
-  { name: "Jan", total: 12 },
-  { name: "Feb", total: 18 },
-  { name: "Mar", total: 15 },
-  { name: "Apr", total: 25 },
-  { name: "May", total: 32 },
-  { name: "Jun", total: 40 },
-];
-
-const revenueData = [
-  { name: "Jan", total: 1200 },
-  { name: "Feb", total: 2100 },
-  { name: "Mar", total: 1800 },
-  { name: "Apr", total: 3200 },
-  { name: "May", total: 4100 },
-  { name: "Jun", total: 5000 },
-];
+interface DashboardStats {
+  totalCustomers: number;
+  totalBays: number;
+  activeMemberships: number;
+  todayBookings: number;
+}
 
 export default function Dashboard() {
+  const { user, tenant } = useAuth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/dashboard", { credentials: "include" })
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load dashboard");
+        return r.json();
+      })
+      .then((data) => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const statCards = [
+    {
+      label: "Bays",
+      value: stats?.totalBays ?? 0,
+      icon: LayoutGrid,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      label: "Today's Bookings",
+      value: stats?.todayBookings ?? 0,
+      icon: CalendarDays,
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+    },
+    {
+      label: "Customers",
+      value: stats?.totalCustomers ?? 0,
+      icon: Users,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Active Memberships",
+      value: stats?.activeMemberships ?? 0,
+      icon: CreditCard,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Last 30 Days</span>
-          </Button>
-        </div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          {tenant?.name ?? "Your facility"} — here's what's happening today.
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Total Net Sales</div>
-            <div className="text-3xl font-black mt-2 text-primary">$0.00</div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Credits Spent: 0 credits
+      {/* Stat cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((card) => (
+          <Card key={card.label}>
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">{card.label}</p>
+                  {loading ? (
+                    <Skeleton className="h-8 w-16 mt-1" />
+                  ) : error ? (
+                    <p className="text-2xl font-bold text-destructive">–</p>
+                  ) : (
+                    <p className="text-3xl font-bold">{card.value}</p>
+                  )}
+                </div>
+                <div className={`w-10 h-10 rounded-lg ${card.bg} flex items-center justify-center`}>
+                  <card.icon className={`h-5 w-5 ${card.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Getting started / empty state */}
+      {!loading && !error && stats && stats.totalBays === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="pt-8 pb-8 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <TrendingUp className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg">Set up your facility</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Start by adding your bays, then invite customers and create bookings. Your dashboard stats will populate as you use the platform.
             </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Customers by month</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={customerData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
-                  <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <a href="/admin/bays" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
+                Add bays →
+              </a>
+              <a href="/admin/customers" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
+                Add customers →
+              </a>
             </div>
           </CardContent>
         </Card>
+      )}
 
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Revenue by month</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+      {error && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="pt-6 text-center text-destructive text-sm">
+            Could not load dashboard data. Please refresh the page.
           </CardContent>
         </Card>
-
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Bookings by month</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={customerData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
-                  <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </div>
   );
 }

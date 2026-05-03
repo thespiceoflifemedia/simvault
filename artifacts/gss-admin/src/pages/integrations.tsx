@@ -1,74 +1,110 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Zap, BookOpen, DollarSign, Lock, TrendingUp } from "lucide-react";
+
+const integrations = [
+  {
+    icon: <DollarSign className="h-5 w-5" />,
+    name: "Stripe",
+    description: "Accept card payments online and at the bay. Connect your Stripe account to enable booking payments.",
+    status: "available",
+    category: "Payments",
+  },
+  {
+    icon: <DollarSign className="h-5 w-5" />,
+    name: "Square",
+    description: "In-person and online payment processing via Square. Import existing customer data and transactions.",
+    status: "available",
+    category: "Payments",
+  },
+  {
+    icon: <TrendingUp className="h-5 w-5" />,
+    name: "QuickBooks",
+    description: "Automatically sync daily revenue, invoices, and refunds to QuickBooks for seamless bookkeeping.",
+    status: "coming-soon",
+    category: "Accounting",
+  },
+  {
+    icon: <Lock className="h-5 w-5" />,
+    name: "RemoteLock",
+    description: "Automate door and bay access via smart locks. Doors unlock when a confirmed booking starts.",
+    status: "coming-soon",
+    category: "Access Control",
+  },
+  {
+    icon: <BookOpen className="h-5 w-5" />,
+    name: "Mailchimp",
+    description: "Sync your customer list for email marketing. Segment members, trial customers, and one-time visitors.",
+    status: "coming-soon",
+    category: "Marketing",
+  },
+];
+
+const statusMap: Record<string, { label: string; class: string }> = {
+  available: { label: "Available", class: "bg-green-50 text-green-700 border-green-200" },
+  connected: { label: "Connected", class: "bg-blue-50 text-blue-700 border-blue-200" },
+  "coming-soon": { label: "Coming Soon", class: "bg-amber-50 text-amber-700 border-amber-200" },
+};
 
 export default function Integrations() {
+  const categories = [...new Set(integrations.map((i) => i.category))];
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
-      <h1 className="text-2xl font-bold tracking-tight">Integrations</h1>
-
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border rounded-md bg-muted/20">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg">QuickBooks</h3>
-                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">Not Connected</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">Sync your sales and revenue data automatically.</p>
-              </div>
-              <Button>Connect QuickBooks</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Provider</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="payarc" defaultChecked />
-              <label
-                htmlFor="payarc"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Enable PayArc payments
-              </label>
-            </div>
-
-            <div className="space-y-4 pt-4 border-t">
-              <div className="space-y-2">
-                <Label htmlFor="merchantId">Merchant ID</Label>
-                <Input id="merchantId" type="password" value="••••••••••••" readOnly />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientId">Client ID</Label>
-                <Input id="clientId" type="password" value="••••••••••••" readOnly />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="clientSecret">Client Secret</Label>
-                <Input id="clientSecret" type="password" value="••••••••••••••••••••••••" readOnly />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="secretKey">Secret Key</Label>
-                <Input id="secretKey" type="password" value="••••••••••••••••••••••••" readOnly />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Integrations</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Connect SimVault with the tools your facility already uses</p>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-10 md:left-[130px] flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">All changes saved</span>
-        <Button>Save Changes</Button>
+      <div className="rounded-xl border bg-primary/5 border-primary/10 p-5 flex items-start gap-3">
+        <Zap className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Integration setup</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Integration configuration is managed by the SimVault team during onboarding. Contact <a href="mailto:hello@simvault.io" className="text-primary hover:underline">hello@simvault.io</a> to connect a service to your account.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {categories.map((category) => (
+          <div key={category}>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{category}</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {integrations
+                .filter((i) => i.category === category)
+                .map((integration, j) => (
+                  <Card key={j}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                            {integration.icon}
+                          </div>
+                          <CardTitle className="text-base">{integration.name}</CardTitle>
+                        </div>
+                        <Badge variant="outline" className={`text-xs ${statusMap[integration.status]?.class ?? ""}`}>
+                          {statusMap[integration.status]?.label}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-sm leading-relaxed">{integration.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={integration.status === "coming-soon"}
+                        className="text-xs"
+                      >
+                        {integration.status === "coming-soon" ? "Notify Me" : "Connect"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

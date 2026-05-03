@@ -5,13 +5,15 @@ import { Loader2 } from "lucide-react";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/login");
+      // Save intended path so login can redirect back
+      const returnTo = location !== "/login" ? location : "/admin";
+      navigate(`/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
-  }, [loading, user, navigate]);
+  }, [loading, user, navigate, location]);
 
   if (loading) {
     return (

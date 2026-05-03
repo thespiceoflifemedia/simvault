@@ -48,7 +48,7 @@ app.use(
     store: new PgStore({
       pool,
       tableName: "user_sessions",
-      createTableIfMissing: true,
+      createTableIfMissing: false,
     }),
     name: "simvault.sid",
     secret: process.env.SESSION_SECRET ?? "simvault-dev-secret-change-in-production",

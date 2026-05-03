@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,10 @@ import { Loader2 } from "lucide-react";
 export default function Login() {
   const { login, register } = useAuth();
   const [, navigate] = useLocation();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const returnTo = params.get("returnTo") ?? "/admin";
+
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +39,7 @@ export default function Login() {
       } else {
         await register({ facilityName: form.facilityName, name: form.name, email: form.email, password: form.password });
       }
-      navigate("/admin");
+      navigate(returnTo);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -104,6 +108,7 @@ export default function Login() {
                 onChange={handleChange}
                 placeholder="you@yourfacility.com"
                 required
+                autoComplete="username"
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#3b82f6]"
               />
             </div>
@@ -117,6 +122,7 @@ export default function Login() {
                 onChange={handleChange}
                 placeholder={mode === "register" ? "At least 8 characters" : "••••••••"}
                 required
+                autoComplete={mode === "register" ? "new-password" : "current-password"}
                 minLength={mode === "register" ? 8 : 1}
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#3b82f6]"
               />
@@ -148,6 +154,10 @@ export default function Login() {
             </button>
           </p>
         </div>
+
+        <p className="text-center text-white/20 text-xs mt-6">
+          <a href="/" className="hover:text-white/40 transition-colors">← Back to SimVault.io</a>
+        </p>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import baysRouter from "./bays";
 import customersRouter from "./customers";
 import bookingsRouter from "./bookings";
 import membershipsRouter from "./memberships";
+import tenantRouter from "./tenant";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(baysRouter);
 router.use(customersRouter);
 router.use(bookingsRouter);
 router.use(membershipsRouter);
+router.use(tenantRouter);
 
 export default router;

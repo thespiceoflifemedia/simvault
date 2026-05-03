@@ -176,7 +176,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats bar */}
+      {/* Platform capability bar */}
       <section className="border-y border-white/10 bg-white/[0.02] backdrop-blur-sm relative z-20">
         <div className="container mx-auto px-4 md:px-8">
           <motion.div
@@ -187,10 +187,10 @@ export default function Home() {
             className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10"
           >
             {[
-              { value: "15%+", label: "Revenue Lift", sub: "On Average" },
-              { value: "200+", label: "Facilities", sub: "Powered" },
-              { value: "5K+", label: "Bookings", sub: "Per Month" },
-              { value: "$2M+", label: "Revenue", sub: "Tracked" }
+              { value: "10", label: "Core Modules", sub: "Bay to CRM" },
+              { value: "REST", label: "Built-in API", sub: "Full CRUD Access" },
+              { value: "100%", label: "Tenant Isolated", sub: "Your Data, Secured" },
+              { value: "1", label: "Platform", sub: "No Stack-Stacking" }
             ].map((stat, i) => (
               <motion.div key={i} variants={fadeIn} className="py-12 text-center">
                 <div className="text-4xl md:text-5xl font-heading font-bold text-[#3b82f6] mb-2">{stat.value}</div>
@@ -342,7 +342,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonial */}
+      {/* Why SimVault */}
       <section className="py-32 overflow-hidden relative">
         <div className="absolute inset-0 bg-[#3b82f6]/5" />
         <div className="container mx-auto px-4 md:px-8 relative z-10 text-center">
@@ -353,21 +353,17 @@ export default function Home() {
             variants={fadeIn}
             className="max-w-4xl mx-auto"
           >
-            <h2 className="font-heading text-sm font-bold mb-16 text-[#3b82f6] uppercase tracking-widest">
-              What our customers say
+            <h2 className="font-heading text-sm font-bold mb-10 text-[#3b82f6] uppercase tracking-widest">
+              Built differently
             </h2>
             <p className="text-3xl md:text-4xl font-heading font-medium leading-relaxed mb-12">
-              "SimVault completely changed how we run our facility. Booking, memberships, food orders — all in one place. Our staff can focus on the guests, not the software."
+              Most booking platforms are generic tools adapted for golf. SimVault is built from the ground up for sim facilities — with a real backend API, tenant isolation, and every tool you need to operate.
             </p>
-            <div className="flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full bg-[#3b82f6]/20 border-2 border-[#3b82f6] flex items-center justify-center mr-4 text-2xl font-bold text-[#3b82f6]">
-                M
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-lg">Marcus D.</div>
-                <div className="text-white/50">Sim Facility Owner, Chicago</div>
-              </div>
-            </div>
+            <Link href="/software">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-full px-8 py-5 text-base">
+                See the full feature set
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -403,7 +399,7 @@ export default function Home() {
                   <span className="text-4xl font-bold">$149</span>
                   <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-[#3b82f6] font-medium mb-4">Up to 4 Bays</p>
                 <p className="text-sm text-white/50 min-h-[60px]">
                   Perfect for small sim facilities with 1–4 bays and minimal staff requirements.
                 </p>
@@ -441,7 +437,7 @@ export default function Home() {
                   <span className="text-4xl font-bold">$249</span>
                   <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-[#3b82f6] font-medium mb-4">Up to 10 Bays</p>
                 <p className="text-sm text-white/50 min-h-[60px]">
                   For growing facilities adding food & beverage and staff scheduling.
                 </p>
@@ -476,7 +472,7 @@ export default function Home() {
                   <span className="text-4xl font-bold">$449</span>
                   <span className="text-white/50 ml-2">/month</span>
                 </div>
-                <p className="text-[#3b82f6] font-medium mb-4">Up to 5 Bays</p>
+                <p className="text-[#3b82f6] font-medium mb-4">Unlimited Bays</p>
                 <p className="text-sm text-white/50 min-h-[60px]">
                   For large facilities with full restaurant, advanced CRM, and multi-location needs.
                 </p>
