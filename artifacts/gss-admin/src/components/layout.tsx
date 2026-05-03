@@ -21,6 +21,8 @@ import {
   LogOut,
   Shield,
   ClipboardList,
+  BookOpen,
+  PackageOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -47,8 +49,10 @@ const facilityNav = [
   { name: "Bays", path: "/admin/bays", icon: LayoutGrid },
   { name: "Customers", path: "/admin/customers", icon: Users },
   { name: "Memberships", path: "/admin/memberships", icon: CreditCard },
+  { name: "Mem Plans", path: "/admin/membership-plans", icon: BookOpen },
   { name: "POS", path: "/admin/pos", icon: Monitor },
   { name: "Passes", path: "/admin/passes", icon: Ticket },
+  { name: "Pass Plans", path: "/admin/pass-plans", icon: PackageOpen },
   { name: "Discounts", path: "/admin/discount-codes", icon: Tag },
   { name: "Reports", path: "/admin/reports", icon: FileBarChart },
   { name: "Employees", path: "/admin/employees", icon: UserCog },

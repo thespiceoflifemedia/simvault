@@ -16,8 +16,10 @@ import Bookings from "@/pages/bookings";
 import Details from "@/pages/details";
 import Bays from "@/pages/bays";
 import Memberships from "@/pages/memberships";
+import MembershipPlans from "@/pages/membership-plans";
 import POS from "@/pages/pos";
 import Passes from "@/pages/passes";
+import PassPlans from "@/pages/pass-plans";
 import DiscountCodes from "@/pages/discount-codes";
 import Employees from "@/pages/employees";
 import Integrations from "@/pages/integrations";
@@ -50,8 +52,10 @@ function AdminRouter() {
           <Route path="/admin/details" component={Details} />
           <Route path="/admin/bays" component={Bays} />
           <Route path="/admin/memberships" component={Memberships} />
+          <Route path="/admin/membership-plans" component={MembershipPlans} />
           <Route path="/admin/pos" component={POS} />
           <Route path="/admin/passes" component={Passes} />
+          <Route path="/admin/pass-plans" component={PassPlans} />
           <Route path="/admin/discount-codes" component={DiscountCodes} />
           <Route path="/admin/employees" component={Employees} />
           <Route path="/admin/integrations" component={Integrations} />
