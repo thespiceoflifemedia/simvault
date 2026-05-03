@@ -12,6 +12,9 @@ import passesRouter from "./passes";
 import discountCodesRouter from "./discount-codes";
 import schedulesRouter from "./schedules";
 import loyaltyPointsRouter from "./loyalty-points";
+import notificationTemplatesRouter from "./notification-templates";
+import legalDocumentsRouter from "./legal-documents";
+import formsRouter from "./forms";
 
 const router: IRouter = Router();
 
@@ -28,5 +31,8 @@ router.use(passesRouter);
 router.use(discountCodesRouter);
 router.use(schedulesRouter);
 router.use(loyaltyPointsRouter);
+router.use(notificationTemplatesRouter);
+router.use(legalDocumentsRouter);
+router.use(formsRouter);
 
 export default router;

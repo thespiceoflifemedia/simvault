@@ -20,6 +20,7 @@ import {
   Menu,
   LogOut,
   Shield,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -53,6 +54,7 @@ const facilityNav = [
   { name: "Employees", path: "/admin/employees", icon: UserCog },
   { name: "Schedules", path: "/admin/schedules", icon: Clock },
   { name: "Integrations", path: "/admin/integrations", icon: Puzzle },
+  { name: "Forms", path: "/admin/forms", icon: ClipboardList },
   { name: "Notices", path: "/admin/notifications", icon: Bell },
   { name: "Legal", path: "/admin/legal", icon: FileText },
   { name: "Audits", path: "/admin/audits", icon: Shield },

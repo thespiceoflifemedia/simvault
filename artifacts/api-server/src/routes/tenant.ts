@@ -19,7 +19,9 @@ const inviteEmployeeSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["admin", "staff"]),
+  role: z.enum(["admin", "manager", "front-desk", "coach", "staff"]),
+  phone: z.string().optional().nullable(),
+  position: z.string().optional().nullable(),
 });
 
 router.get("/tenant", requireAuth, async (req, res) => {

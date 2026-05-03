@@ -43,7 +43,11 @@
 | GET/POST | `/api/memberships` | List / create memberships |
 | GET/PUT/DELETE | `/api/memberships/:id` | Get / update / delete membership |
 | GET/PUT | `/api/tenant` | Get / update current tenant settings |
-| GET/POST/DELETE | `/api/employees` | List / create / remove team members |
+| GET/POST/DELETE | `/api/employees` | List / create / remove team members (roles: admin/manager/front-desk/coach/staff) |
+| GET/PUT | `/api/notification-templates` | List / update notification templates (auto-seeded with 10 defaults) |
+| GET/PUT | `/api/legal-documents` | List / update legal docs (auto-seeded with 4 defaults) |
+| GET/POST/PUT/DELETE | `/api/forms` | Forms CRUD |
+| GET | `/api/forms/:id/submissions` | Form submissions for a specific form |
 
 ## DB Schema Notes
 
@@ -52,6 +56,10 @@
 - **customers**: `email` is `notNull`
 - **sessions**: stored in `user_sessions` table — `createTableIfMissing: false` (table pre-created via SQL)
 - **zod** must be imported as `"zod"` not `"zod/v4"` in API server (esbuild limitation)
+- **notification_templates**: auto-seeded 10 templates per tenant on first GET; updatedAt managed manually
+- **legal_documents**: auto-seeded 4 docs per tenant (terms, waiver, privacy, booking-disclaimer)
+- **forms**: JSONB `questions` field; `form_submissions` tracks responses
+- **DB migration for new tables**: drizzle-kit push has interactive TUI issue; use direct SQL via `lib/db/node_modules/pg` instead
 
 ## Admin Pages
 
@@ -59,14 +67,15 @@
 |------|--------|-------|
 | Dashboard | ✅ Live | Stats + 7-day revenue bar chart (Recharts) + live bay status panel + recent bookings |
 | Bays | ✅ Live | Full CRUD |
-| Customers | ✅ Live | Full CRUD — rows are clickable, navigates to customer profile |
+| Customers | ✅ Live | Full CRUD — clickable rows → profile, CSV export, CSV import, edit/delete |
 | Customer Profile | ✅ Live | `/admin/customers/:id` — contact info, booking history table, memberships, stats cards, edit/delete |
 | Bookings | ✅ Live | Full CRUD + calendar grid rendering real booking blocks (6 AM–10 PM) |
 | Memberships | ✅ Live | Full CRUD |
-| Employees / Team | ✅ Live | Full CRUD — add/remove team members via `/api/employees` |
+| Employees / Team | ✅ Live | Full CRUD — roles: Admin/Manager/Front Desk/Coach/Staff, position + phone fields |
 | Facility Settings | ✅ Live | Wired to `/api/tenant` |
-| Notifications | ✅ Live | Per-template editor with subject/body + saveable toggles |
-| Legal | ✅ Live | Tabbed editor: Terms, Waiver, Privacy Policy |
+| Notifications | ✅ Live | API-backed — 10 default templates, email/SMS toggle per template, subject+body editor with variable insertion + live preview |
+| Legal | ✅ Live | API-backed sidebar layout — 4 docs (Terms/Waiver/Privacy/Disclaimer), active toggle, require-acceptance toggle |
+| Forms | ✅ Live | Full CRUD form builder — question types (text/email/phone/textarea/select/date/checkbox), type tags, active toggle, form preview dialog |
 | Audits | ✅ Live | Audit log page with search/filter (client-side, no DB table yet) |
 | Support | ✅ Live | FAQ + contact form at `/admin/org/support` |
 | Reports | ✅ Live | 11 clickable reports — Booking History, Billing History, End of Day, Open Bills, Shift Report, Monthly Revenue, Quarterly Revenue, Category Performance, Peak Hours, Peak Days, Player Counts — all backed by real /api/bookings data |

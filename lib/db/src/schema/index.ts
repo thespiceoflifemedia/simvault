@@ -9,3 +9,6 @@ export * from "./passes";
 export * from "./discount-codes";
 export * from "./schedules";
 export * from "./loyalty-points";
+export * from "./notification-templates";
+export * from "./legal-documents";
+export * from "./forms";

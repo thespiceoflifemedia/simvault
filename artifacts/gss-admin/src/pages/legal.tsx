@@ -1,158 +1,158 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Save, FileText, ShieldCheck, Lock } from "lucide-react";
+import { Save, FileText, ShieldCheck, Lock, BookOpen, Loader2 } from "lucide-react";
 
-const DEFAULT_TERMS = `TERMS AND CONDITIONS
+interface LegalDoc {
+  id: number;
+  type: string;
+  title: string;
+  content: string;
+  active: boolean;
+  requireAcceptance: boolean;
+  updatedAt: string;
+}
 
-Last updated: January 1, 2025
+const DOC_ICONS: Record<string, React.ReactNode> = {
+  terms: <FileText className="h-4 w-4" />,
+  waiver: <ShieldCheck className="h-4 w-4" />,
+  privacy: <Lock className="h-4 w-4" />,
+  "booking-disclaimer": <BookOpen className="h-4 w-4" />,
+};
 
-By booking a bay at our facility, you agree to the following terms and conditions.
-
-1. RESERVATIONS
-All reservations must be made in advance. Walk-ins are accepted subject to availability. Reservations are confirmed upon receipt of payment.
-
-2. CANCELLATIONS
-Cancellations made more than 24 hours before the session start time will receive a full refund or credit. Cancellations within 24 hours will forfeit the session fee.
-
-3. CONDUCT
-All guests are expected to behave in a respectful and safe manner. Management reserves the right to remove any guest for inappropriate conduct without refund.
-
-4. EQUIPMENT
-Guests are responsible for any damage caused to facility equipment or property during their session.
-
-5. LIABILITY
-Use of our facility is at your own risk. We are not responsible for personal injury or loss of personal property.`;
-
-const DEFAULT_WAIVER = `WAIVER AND RELEASE OF LIABILITY
-
-Please read this document carefully before participating in any activity at our facility.
-
-ASSUMPTION OF RISK
-I understand that participation in sports simulation activities involves inherent risks, including but not limited to: physical injury from swinging implements, tripping, or falling.
-
-RELEASE OF LIABILITY
-In consideration of being permitted to use the facility, I hereby release, waive, discharge, and covenant not to sue the facility, its owners, employees, and agents from any and all liability, claims, demands, or causes of action arising from my participation.
-
-INDEMNIFICATION
-I agree to indemnify and hold harmless the facility and its representatives from any claims, including attorney's fees, arising from my actions or negligence while using the facility.
-
-MEDICAL AUTHORIZATION
-In the event of an emergency, I authorize facility staff to seek medical assistance on my behalf.
-
-By proceeding with your booking, you acknowledge that you have read, understood, and agree to these terms.`;
-
-const DEFAULT_PRIVACY = `PRIVACY POLICY
-
-Last updated: January 1, 2025
-
-We respect your privacy and are committed to protecting your personal information.
-
-INFORMATION WE COLLECT
-We collect information you provide directly to us, including your name, email address, phone number, and payment information when you book a session or create an account.
-
-HOW WE USE YOUR INFORMATION
-We use the information we collect to process bookings, send confirmation and reminder emails, communicate with you about your sessions, and improve our services.
-
-DATA SHARING
-We do not sell or rent your personal information to third parties. We may share your information with payment processors and email service providers solely to facilitate our services.
-
-DATA RETENTION
-We retain your information for as long as your account is active or as needed to provide services. You may request deletion of your data at any time by contacting us.
-
-COOKIES
-Our booking platform uses cookies to maintain your session and preferences. You may disable cookies in your browser settings, though this may affect functionality.
-
-CONTACT
-For privacy-related questions, please email hello@simvault.io.`;
+const DOC_WARNINGS: Record<string, { variant: string; msg: string }> = {
+  terms: { variant: "amber", msg: "Displayed to customers during booking. Keep it accurate and up to date." },
+  waiver: { variant: "amber", msg: "Customers must acknowledge this before their first session. Consult a legal professional before modifying." },
+  privacy: { variant: "blue", msg: "Explains how you collect and use customer data. Required in most jurisdictions." },
+  "booking-disclaimer": { variant: "amber", msg: "Shown to customers at checkout as a final confirmation of their agreement." },
+};
 
 export default function Legal() {
   const { toast } = useToast();
-  const [terms, setTerms] = useState(DEFAULT_TERMS);
-  const [waiver, setWaiver] = useState(DEFAULT_WAIVER);
-  const [privacy, setPrivacy] = useState(DEFAULT_PRIVACY);
-  const [saving, setSaving] = useState(false);
+  const [docs, setDocs] = useState<LegalDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string>("terms");
 
-  const handleSave = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setSaving(false);
-    toast({ title: "Legal documents saved", description: "Your documents have been updated successfully." });
+  const load = async () => {
+    setLoading(true);
+    const res = await fetch("/api/legal-documents", { credentials: "include" });
+    if (res.ok) setDocs(await res.json());
+    setLoading(false);
   };
 
+  useEffect(() => { load(); }, []);
+
+  const update = (id: number, changes: Partial<LegalDoc>) => {
+    setDocs((prev) => prev.map((d) => d.id === id ? { ...d, ...changes } : d));
+  };
+
+  const handleSave = async (doc: LegalDoc) => {
+    setSaving(doc.id);
+    const res = await fetch(`/api/legal-documents/${doc.id}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: doc.content, active: doc.active, requireAcceptance: doc.requireAcceptance }),
+    });
+    setSaving(null);
+    if (res.ok) {
+      toast({ title: `${doc.title} saved`, description: "Document updated successfully." });
+    } else {
+      toast({ title: "Error saving", variant: "destructive" });
+    }
+  };
+
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  if (loading) return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+
+  const activeDoc = docs.find((d) => d.type === selected);
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Legal Documents</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Manage your terms, waiver, and privacy policy shown to customers during booking
+            Manage your legal content shown to customers during booking and sign-up
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? "Saving…" : "Save Changes"}
-        </Button>
       </div>
 
-      <Tabs defaultValue="terms">
-        <TabsList className="mb-4">
-          <TabsTrigger value="terms" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" /> Terms & Conditions
-          </TabsTrigger>
-          <TabsTrigger value="waiver" className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" /> Liability Waiver
-          </TabsTrigger>
-          <TabsTrigger value="privacy" className="flex items-center gap-2">
-            <Lock className="h-4 w-4" /> Privacy Policy
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Doc list sidebar */}
+        <div className="space-y-2">
+          {docs.map((doc) => (
+            <button
+              key={doc.id}
+              onClick={() => setSelected(doc.type)}
+              className={`w-full text-left px-3 py-3 rounded-lg border transition-colors ${selected === doc.type ? "bg-primary/5 border-primary/30" : "bg-card border-border hover:bg-muted/40"}`}
+            >
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary">{DOC_ICONS[doc.type] ?? <FileText className="h-4 w-4" />}</span>
+                  <span className="text-sm font-medium">{doc.title}</span>
+                </div>
+                <Badge variant="outline" className={`text-[10px] px-1.5 ${doc.active ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}>
+                  {doc.active ? "Live" : "Off"}
+                </Badge>
+              </div>
+              <div className="text-[10px] text-muted-foreground ml-6">Updated {fmt(doc.updatedAt)}</div>
+            </button>
+          ))}
+        </div>
 
-        <TabsContent value="terms" className="space-y-3">
-          <div className="rounded-lg border bg-amber-50/40 dark:bg-amber-950/20 border-amber-200/50 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-            This document is displayed to customers when they complete a booking. Keep it accurate and up to date.
-          </div>
-          <div className="space-y-1.5">
-            <Label>Terms &amp; Conditions</Label>
-            <Textarea
-              className="min-h-[420px] font-mono text-sm leading-relaxed resize-y"
-              value={terms}
-              onChange={(e) => setTerms(e.target.value)}
-            />
-          </div>
-        </TabsContent>
+        {/* Editor */}
+        {activeDoc ? (
+          <div className="lg:col-span-3 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-primary">{DOC_ICONS[activeDoc.type] ?? <FileText className="h-5 w-5" />}</span>
+                <h2 className="text-lg font-semibold">{activeDoc.title}</h2>
+              </div>
+              <Button onClick={() => handleSave(activeDoc)} disabled={saving === activeDoc.id}>
+                <Save className="h-4 w-4 mr-2" />
+                {saving === activeDoc.id ? "Saving…" : "Save Changes"}
+              </Button>
+            </div>
 
-        <TabsContent value="waiver" className="space-y-3">
-          <div className="rounded-lg border bg-amber-50/40 dark:bg-amber-950/20 border-amber-200/50 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-            Customers must acknowledge this waiver before their first session. Consult a legal professional before modifying.
-          </div>
-          <div className="space-y-1.5">
-            <Label>Liability Waiver</Label>
-            <Textarea
-              className="min-h-[420px] font-mono text-sm leading-relaxed resize-y"
-              value={waiver}
-              onChange={(e) => setWaiver(e.target.value)}
-            />
-          </div>
-        </TabsContent>
+            {DOC_WARNINGS[activeDoc.type] && (
+              <div className={`rounded-lg border px-4 py-3 text-sm ${DOC_WARNINGS[activeDoc.type].variant === "blue" ? "bg-blue-50/40 border-blue-200/50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400" : "bg-amber-50/40 border-amber-200/50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"}`}>
+                {DOC_WARNINGS[activeDoc.type].msg}
+              </div>
+            )}
 
-        <TabsContent value="privacy" className="space-y-3">
-          <div className="rounded-lg border bg-blue-50/40 dark:bg-blue-950/20 border-blue-200/50 px-4 py-3 text-sm text-blue-700 dark:text-blue-400">
-            Your privacy policy explains how you collect and use customer data. Required in most jurisdictions.
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-3">
+                <Switch id="doc-active" checked={activeDoc.active} onCheckedChange={(v) => update(activeDoc.id, { active: v })} />
+                <Label htmlFor="doc-active">Published (visible to customers)</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch id="doc-accept" checked={activeDoc.requireAcceptance} onCheckedChange={(v) => update(activeDoc.id, { requireAcceptance: v })} />
+                <Label htmlFor="doc-accept">Require acceptance at checkout</Label>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{activeDoc.title}</Label>
+              <Textarea
+                className="min-h-[450px] font-mono text-sm leading-relaxed resize-y"
+                value={activeDoc.content}
+                onChange={(e) => update(activeDoc.id, { content: e.target.value })}
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label>Privacy Policy</Label>
-            <Textarea
-              className="min-h-[420px] font-mono text-sm leading-relaxed resize-y"
-              value={privacy}
-              onChange={(e) => setPrivacy(e.target.value)}
-            />
+        ) : (
+          <div className="lg:col-span-3 flex items-center justify-center h-64 text-muted-foreground text-sm">
+            Select a document to edit
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }
