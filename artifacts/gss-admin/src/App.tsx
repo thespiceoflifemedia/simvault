@@ -31,6 +31,7 @@ import Notifications from "@/pages/notifications";
 import Audits from "@/pages/audits";
 import Support from "@/pages/support";
 import Forms from "@/pages/forms";
+import FacilitySettings from "@/pages/facility-settings";
 
 import Home from "@/pages/marketing/home";
 import About from "@/pages/marketing/about";
@@ -66,6 +67,7 @@ function AdminRouter() {
           <Route path="/admin/notifications" component={Notifications} />
           <Route path="/admin/audits" component={Audits} />
           <Route path="/admin/forms" component={Forms} />
+          <Route path="/admin/facility-settings" component={FacilitySettings} />
           <Route path="/admin/org/support" component={Support} />
           <Route component={NotFound} />
         </Switch>

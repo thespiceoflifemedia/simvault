@@ -23,6 +23,7 @@ import {
   ClipboardList,
   BookOpen,
   PackageOpen,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -63,6 +64,7 @@ const facilityNav = [
   { name: "Legal", path: "/admin/legal", icon: FileText },
   { name: "Audits", path: "/admin/audits", icon: Shield },
   { name: "Settings", path: "/admin/details", icon: Settings },
+  { name: "Fac. Setup", path: "/admin/facility-settings", icon: SlidersHorizontal },
   { name: "Support", path: "/admin/org/support", icon: LifeBuoy },
 ];
 
